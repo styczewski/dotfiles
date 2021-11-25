@@ -7,7 +7,7 @@ Możesz korzystać z plików dostosowując je do swoich potrzeb.
 
 ## Zrzuty ekranu
 
-![screenshot](https://github.com/styczewski/dotfiles/screenshots/vim.png)
+![zrzut vim](https://github.com/styczewski/dotfiles/blob/master/screenshots/vim.png)
 
 
 
