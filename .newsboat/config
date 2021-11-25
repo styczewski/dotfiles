@@ -1,0 +1,79 @@
+auto-reload yes
+cleanup-on-quit yes
+download-path "/home/pstyczewski/Pobrane/jw-newsboat-podboat/%n"
+browser "/usr/bin/google-chrome-stable"
+# browser "w3m"
+# browser "~/bin/open-in-pane"
+# browser "opera"
+# feed-sort-order title-dec
+max-downloads 4
+notify-always yes
+notify-format "newsbeuter: %n unread articles within %f unread feeds"
+notify-program notify-send
+notify-xterm yes
+notify-screen yes
+player mplayer
+refresh-on-startup yes
+reload-time 10
+reload-threads 2
+show-read-articles yes
+show-read-feeds yes
+goto-next-feed no
+
+# cache ----------------------------------------------------------------
+cache-file "/home/pstyczewski/.newsboat/cache.db"
+
+# bookmark -------------------------------------------------------------
+bookmark-cmd "~/.newsboat/bookmark-plugin.sh"
+
+# binds ----------------------------------------------------------------
+unbind-key t
+unbind-key R
+bind-key \ reload-all
+bind-key t select-tag
+bind-key "SPACE" open
+confirm-exit no
+bind-key g home
+bind-key G end
+bind-key a toggle-article-read
+bind-key k up
+bind-key j down
+bind-key d pagedown
+bind-key u pageup
+bind-key U show-urls
+bind-key l open
+bind-key h quit
+bind-key s sort
+bind-key S rev-sort
+
+bind-key D pb-download
+bind-key x pb-delete
+
+# hide articles matching: ---------------------------------------------
+ignore-article "*" "title =~ \"Sponsor\""
+ignore-article "*" "title =~ \"Advertisement\""
+ignore-mode "display"
+
+
+# formatting and colorization ------------------------------------------
+articlelist-format "%4i %f %D  %?T?|%-17T| ?%t"
+
+color info default default reverse
+color listnormal_unread yellow default
+color listfocus blue default reverse bold
+color listfocus_unread blue default reverse bold
+
+# highlights
+highlight article "^(Title):.*$" blue default
+highlight article "https?://[^ ]+" red default
+highlight article "\\[image\\ [0-9]+\\]" green default
+
+# add video or audio to play queue using mpv (requires: task-spooler, mpv, youtube-dl)
+# task-spooler: https://www.youtube.com/watch?v=wv8D8wT20ZY
+# youtube-dl: https://www.youtube.com/watch?v=MFxlwVhwayg
+macro p set browser "tsp mpv --ontop --no-border --force-window --autofit=500x280 --geometry=-15-10 %u"; open-in-browser ; set browser "w3m %u"
+
+# copy url to clipboard "yank"
+# xclip: https://www.youtube.com/watch?v=fKP0FLp3uW0
+macro y set browser "echo -n %u | xclip -selection clipboard"; open-in-browser ; set browser "$BROWSER %u"
+
