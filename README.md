@@ -1,6 +1,6 @@
 # Pliki konfiguracyjne (Paweł Styczewski)
 
-Możesz korzystać z plików dostosowując je do swoich potrzeb.
+Choć pliki te umieszczam na github dla własnego pożytku, możesz z nich dowolnie korzystać dostosowując je do swoich potrzeb.
 
 ## Ustawienia dla
 - VIM  (edytor tekstu)
