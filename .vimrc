@@ -33,9 +33,12 @@ Plug 'vim-airline/vim-airline-themes' " Airline
 Plug 'vimwiki/vimwiki'
 Plug 'sk1418/HowMuch'
 Plug 'nixon/vim-vmath'
+Plug 'tyru/capture.vim'
 Plug 'junegunn/fzf' , { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
 Plug 'easymotion/vim-easymotion'
 Plug 'vim-scripts/VisIncr'
+Plug 'wpug/vim-utl-calutil'
 Plug 'itchyny/calendar.vim'
 Plug 'tpope/vim-abolish'
 Plug 'christoomey/vim-system-copy'
@@ -43,8 +46,6 @@ Plug 'christoomey/vim-system-copy'
   let g:system_copy#paste_command='xclip -sel clipboard -o'
   let g:system_copy_silent = 1
 Plug 'scrooloose/nerdtree' " Better file browser
-Plug 'ctrlpvim/ctrlp.vim' " Code and files fuzzy finder
-Plug 'fisadev/vim-ctrlp-cmdpalette' " Extension to ctrlp, for fuzzy command finder
 Plug 'vim-airline/vim-airline' " Airline
 Plug 'tpope/vim-surround' " Surround
 Plug 'honza/vim-snippets'
@@ -53,7 +54,6 @@ Plug 'garbas/vim-snipmate'
 Plug 't9md/vim-choosewin' " Window chooser
 Plug 'godlygeek/tabular' "Tabularize
 Plug 'plasticboy/vim-markdown'
-Plug 'Townk/vim-autoclose' " Autoclose
 Plug 'michaeljsmith/vim-indent-object' " Indent text object
 Plug 'jeetsukumaran/vim-indentwise' " Indentation based movements
 Plug 'motemen/git-vim' " Git integration
@@ -113,9 +113,6 @@ set nowrap
 set hidden
 set colorcolumn=80
 set cm=blowfish2
-set timeoutlen=1000 ttimeoutlen=0 " Eliminating delays on ESC in vim and
-set spelllang=pl "sprawdzanie pisowni
-set complete+=kspell
 set expandtab "tabs and spaces handling
 set tabstop=2 "tabs and spaces handling
 set softtabstop=2 "tabs and spaces handling
@@ -134,6 +131,8 @@ set completeopt=menuone,longest
 set scrolloff=0 " when scrolling, keep cursor x lines away from screen border
 set wildmenu " podpowiedzi dla komend systemowych i uzupełnianie nazw plików
 set confirm " pytaj o potwierdzenie zamiast odmawiać wykonania operacji
+set timeoutlen=1000 ttimeoutlen=0 " Eliminating delays on ESC in vim and
+set showcmd
 
 " better backup, swap and undos storage
 set directory=~/.vim/dirs/tmp     " directory to place swap files in
@@ -144,7 +143,10 @@ set undodir=~/.vim/dirs/undos
 set viminfo+=n~/.vim/dirs/viminfo
 
 syntax on " syntax highlight on
-setlocal spell
+
+"set spelllang=pl "sprawdzanie pisowni
+setlocal nospell
+set complete+=kspell
 
 " set listchars=tab:▸\ ,eol:¬,trail:_
 set lazyredraw
@@ -192,9 +194,11 @@ if !isdirectory(&undodir)
 endif
 
 "}}}
+
 " My own mappings {{{
 
 let mapleader = "\<Space>"
+"let mapleader = ","
 nnoremap ; :
 nnoremap : ;
 vnoremap ; :
@@ -204,6 +208,18 @@ vnoremap , (<ESC>v(
 vnoremap n j<ESC>V
 vnoremap m k<ESC>V
 inoremap ;; <Esc>
+inoremap UU <Esc>hviWgUA
+nnoremap <leader>da :r! date<CR>
+nmap <leader>wer ^v$hy;r! nwt 0zzvipojgq
+
+" Autoclose
+inoremap " ""<left>
+inoremap ' ''<left>
+inoremap ( ()<left>
+inoremap [ []<left>
+inoremap { {}<left>
+inoremap {<CR> {<CR>}<ESC>O
+inoremap <C-l> <ESC>la
 
 " save as sudo
 ca w!! w !sudo tee "%"
@@ -213,14 +229,6 @@ nmap <leader>linia ;%s/^/\=printf('%02d-', line('.'))<cr>
 
 "refocus folds; close any other fold except the one that you are on
 nnoremap ,z zMzvzt
-
-"searching vimgrep
-command! -nargs=1 Ngrep noautocmd vimgrep "<args>" **/*.*
-nnoremap <leader>[ :Ngrep
-nnoremap [q :cprev<CR>
-nnoremap ]q :cnext<CR>
-nnoremap [Q :cfirst<CR>
-nnoremap ]Q :clast<CR>
 
 "moving line and adding empty line Ctrl+ ...
 no <C-k> ddkP
@@ -247,7 +255,7 @@ nnoremap <PageDown> :silent bn<CR> :redraw!<CR>
 nnoremap <PageUp> :silent bp<CR> :redraw!<CR>
 
 " paste from system clipboard
-nnoremap <leader>vv :r !xsel -b<CR>
+nnoremap <c-p> :r !xsel -b<CR>
 imap <c-p> ;r !xsel -b<CR>
 
 " map ts ;tab split<CR>
@@ -261,9 +269,7 @@ nmap <F9> o;r !nwt<space>
 imap <F9> 0v$hyddo;r !nwt 0
 
 autocmd FileType markdown nnoremap <F10> :w<cr>:!pandoc % --pdf-engine=lualatex --toc -V toc-title:"Spis treści" -V mainfont="calibri.ttf" -V colorlinks -V urlcolor=NavyBlue -o %:r.pdf <cr>
-
-" nmap <leader>wer {jvipgq{jI**/	i**I> vipgq{j>>..vipgq;w
-" imap <F9> 0v$hyddo;r !nwt 0{jvipgq{jI**/	i**I> vipgq
+nnoremap <F2> :w<cr>:Vimwiki2HTML<CR>:! vim -s/home/pstyczewski/bin/vimcolorvimwiki.vim /home/pstyczewski/encfs/notes/wiki_html/%:r.html<CR>:! weasyprint -s/home/pstyczewski/encfs/notes/wiki_html/style.css /home/pstyczewski/encfs/notes/wiki_html/%:r.html/home/pstyczewski/Dokumenty/%:r.pdf<CR>:! zathura /home/pstyczewski/Dokumenty/%:r.pdf&<CR>
 
 " Open terminal in split
 nnoremap <leader>st :terminal<CR>
@@ -359,6 +365,7 @@ nnoremap k gk
 nnoremap gk k
 
 "}}}
+
 " TEO syntax & keys {{{
 autocmd Syntax * syntax region textred start=">R" end="R<"
 autocmd Syntax * syntax region textblue start=">B" end="B<"
@@ -394,16 +401,14 @@ vmap <F8> <leader>tr
 
 nmap <leader>kk ;so ~/.vim/syntax/wiki.vim<cr>
 " }}}
+
 " Plugins settings and mappings ================================================
 " NERDTree {{{
 " toggle nerdtree display
 map <F4> ;NERDTreeToggle<CR>
 "}}}
-" Autoclose {{{
-" Fix to let ESC work as espected with Autoclose plugin
-let g:AutoClosePumvisible = {"ENTER": "\<C-Y>", "ESC": "\<ESC>"}
-inoremap <C-l> <ESC>la
-"}}}
+
+
 " Window Chooser {{{
 nmap  `  <Plug>(choosewin)
 let g:choosewin_overlay_enable = 1
@@ -417,22 +422,25 @@ let g:airline#extensions#whitespace#enabled = 0
 let g:vimwiki_list = [{'path': '$HOME/encfs/notes/wiki'}]
 let g:vimwiki_folding='expr'
 let g:vimwiki_hl_headers=1
-let g:vimwiki_list_ignore_newline=0
 let g:vimwiki_text_ignore_newline=0
+let g:vimwiki_list_ignore_newline=0
 let g:vimwiki_hl_cb_checked=1
 let g:vimwiki_table_mappings=0
-let g:vimwiki_list_ignore_newline=1
 " let g:vimwiki_ext2syntax = {'.md': 'markdown', '.markdown': 'markdown', '.mdown': 'markdown', }
 
 nmap <tab> <Plug>VimwikiNextLink
 nmap <s-tab> <Plug>VimwikiPrevLink
-" nmap <Leader>dd <Plug>VimwikiDeleteLink
-nmap <Leader>rr <Plug>VimwikiRenameLink
-" nmap <Leader>vv <Plug>VimwikiVSplitLink
-" nmap <Leader>hh <Plug>VimwikiSplitLink
-nmap <leader>dom <leader>wwgg/domozM/tentyzvztk
-nmap <leader>teo <leader>wwgg/zborozM/tentyzvztk
-nmap <leader>slu <leader>wwgg/sluzbozM/tentyzvztk
+nmap <Leader>wd <Plug>VimwikiDeleteFile
+nmap <Leader>wr <Plug>VimwikiRenameFile
+nmap <Leader>vv <Plug>VimwikiVSplitLink
+nmap <Leader>hh <Plug>VimwikiSplitLink
+nmap <Leader>html <Plug>Vimwiki2HTML
+nmap <leader>tab ;VimwikiTable 
+nmap <leader>mcl ;VimwikiTableMoveColumnLeft<CR>
+nmap <leader>mcr ;VimwikiTableMoveColumnRight<CR>
+nmap <leader>dom <leader>wwgg/domoggddOdate<Tab>yiW/<c-r>0<CR>nnzt
+nmap <leader>teo <leader>wwgg/zboroggddOdate<Tab>yiW/<c-r>0<CR>nnzt
+nmap <leader>slu <leader>wwgg/sluzboggddOdate<Tab>yiW/<c-r>0<CR>nnzt
 nnoremap <leader><Space> za
 "}}}
 " itchyny/calendar {{{
@@ -441,7 +449,7 @@ let g:calendar_google_calendar = 1
 let g:calendar_google_task = 1
 let g:calendar_task=0
 let g:calendar_first_day = "monday"
-nmap <leader>cal ;Calendar -view=year -split=vertical -width=35<CR>
+nmap <leader>cal ;Calendar -view=year<CR>
 " }}}
 " Easymotion {{{
 map <Leader> <Plug>(easymotion-prefix)
@@ -460,18 +468,32 @@ let g:EasyMotion_startofline = 1 " keep cursor column when JK motion
 map  <leader>/ <Plug>(easymotion-sn)
 omap <leader>/ <Plug>(easymotion-tn)
 " }}}
-" CtrlP {{{
-" let g:ctrlp_map = ',e'
-nmap <leader>e ;CtrlP<CR>
-nmap <leader>b ;CtrlPBuffer<CR>
-nmap <leader>l ;CtrlPLine<CR>
-"}}}
+
 " FZF  {{{
 nmap <leader>o ;FZF<CR>
 nmap <leader>O ;tabnew<CR>;FZF<CR>
-nmap <leader>fv ;FZF /home/pstyczewski/encfs/notes/<CR>
-nmap <leader>Fv ;tabnew<CR>;FZF /home/pstyczewski/encfs/notes/<CR>
+
+" This is the default option:
+"   - Preview window on the right with 50% width
+"   - CTRL-/ will toggle preview window.
+" - Note that this array is passed as arguments to fzf#vim#with_preview function.
+" - To learn more about preview window options, see `--preview-window` section of `man fzf`.
+let g:fzf_preview_window = ['right:50%', 'ctrl-/']
+
+" Preview window on the upper side of the window with 40% height,
+" hidden by default, ctrl-/ to toggle
+let g:fzf_preview_window = ['up:40%:hidden', 'ctrl-/']
+
+" Empty value to disable preview window altogether
+let g:fzf_preview_window = []
+
+nnoremap <leader>g :GFiles<CR>
+nnoremap <leader>b :Buffers<CR>
+nnoremap <leader>f :Files<CR>
+nnoremap <leader>e :History<CR>
+
 "}}}
+
 " GOYO {{{
 
 let g:goyo_width = 80
@@ -481,6 +503,7 @@ let g:goyo_liner = 0
 nnoremap <silent> <leader>gy :Goyo<CR> 
 
 " }}}
+
 " Vim-match & calculate  {{{
 " == [ vim-vmath ] ===========================================================
 " github.com/nixon/vim-vmath - sum: 21   avg: 3.5   min: 1   max: 6   count: 6
@@ -491,11 +514,13 @@ nmap            ++  vip++
 " calculate in line
 nmap <leader>ile <Esc>0v$h<space>?=
 "}}}
+
 " Pickachu {{{
 let g:pickachu_default_date_format = "%A %d/%m/%Y"
 imap <C-k> <ESC>;Pickachu date<CR>
 imap <C-f> <ESC>;Pickachu file<CR>
 " }}}
+
 " mutt ranger att {{{
 " mutt: insert attachment with ranger
 fun! RangerMuttAttach()
@@ -512,4 +537,24 @@ fun! RangerMuttAttach()
 endfun
 imap <C-a> <ESC>gg/Reply-To<CR><ESC>;call RangerMuttAttach()<CR>}
 " }}}
+
+"{{{ Commands
+
+command! -nargs=1 -bang GrepBuffer
+ \ :execute printf(':Capture! global%s/%s/print',
+ \ expand('<bang>'),
+ \ <q-args>)
+
+"searching vimgrep
+command! -nargs=1 Ngrep noautocmd vimgrep "<args>" **/*.*
+nnoremap <leader>[ :Ngrep
+nnoremap [q :cprev<CR>
+nnoremap ]q :cnext<CR>
+nnoremap [Q :cfirst<CR>
+nnoremap ]Q :clast<CR>
+
+"}}}
+
+:source ~/Dropbox/vim/abbreviations.vim
+
 " vim:foldmethod=marker:foldlevel=0
