@@ -3,6 +3,8 @@
 Choć pliki te umieszczam na github dla własnego pożytku, możesz z nich dowolnie korzystać dostosowując je do swoich potrzeb.
 
 ## Ustawienia dla programów terminalowych
+Jestem olbrzymim fanem terminala i programów uruchamianych w "czarnym okienku"
+
 - VIM  (edytor tekstu)
 - Ranger (manedżer plików)
 - Newsboat (czytnik kanałów RSS)
