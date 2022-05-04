@@ -4,7 +4,7 @@
 " |  __/ (_| |\ V  V /  __/ |___) |   <| |
 " |_|   \__,_| \_/\_/ \___|_|____/|_|\_\_|
 "
-" Zmieniono: sob, 9 kwi 2022, 08:42:30 CEST
+" Zmieniono: śro, 4 maj 2022, 22:05:27 CEST
 
 " Vim-plug initialization {{{
 
@@ -67,6 +67,7 @@ Plug 'markonm/traces.vim'
 Plug 'vim-scripts/AutoComplPop'
 Plug 'Valloric/YouCompleteMe'
 Plug 'vim-scripts/MultipleSearch'
+Plug 'guns/xterm-color-table.vim'
 
 " Plugins from vim-scripts repos:
 Plug 'vim-scripts/IndexedSearch' " Search results counter
@@ -75,7 +76,7 @@ Plug 'vim-scripts/IndexedSearch' " Search results counter
 " Plug 'vim-scripts/YankRing.vim' " Yank history navigation
 
 " colorscheme
-let g:colors_name = "gruvbox8_hard"
+"let g:colors_name = "gruvbox8_hard"
 
 " Tell vim-plug we finished declaring plugins, so it can load them
 call plug#end()
@@ -97,19 +98,20 @@ set background=dark
 nmap <C-b> ;let &background = ( &background == "dark"? "light" : "dark" )<CR>
 
 "}}}
-
+" Backup files after edit {{{
+autocmd BufWritePost ~/.vimrc silent !/home/pstyczewski/bin/back-after-edit-vim.sh
+autocmd BufWritePost ~/.zshrc silent !/home/pstyczewski/bin/back-after-edit-zsh.sh
+autocmd BufWritePost ~/Dropbox/doku/doku silent !/home/pstyczewski/bin/back-after-edit-doku.sh
+autocmd BufWritePost ~/.config/i3/config silent !/home/pstyczewski/bin/back-after-edit-i3.sh
+autocmd BufWritePost ~/.config/ranger/rc.conf silent !/home/pstyczewski/bin/back-after-edit-ranger.sh
+autocmd BufWritePost ~/.newsboat/urls silent !/home/pstyczewski/bin/back-after-edit-newsboat-urls.sh
 
 autocmd BufReadPre *.pdf silent set ro
 autocmd BufReadPost *.pdf silent %!pdftotext -nopgbrk -layout -q -eol unix "%" - | fmt -w78
 
 
-" Backup files after edit {{{
-autocmd BufWritePost ~/.vimrc !/home/pstyczewski/bin/back-after-edit-vim.sh
-autocmd BufWritePost ~/.zshrc !/home/pstyczewski/bin/back-after-edit-zsh.sh
-autocmd BufWritePost ~/Dropbox/doku/doku !/home/pstyczewski/bin/back-after-edit-doku.sh
-autocmd BufWritePost ~/.config/i3/config !/home/pstyczewski/bin/back-after-edit-i3.sh
-autocmd BufWritePost ~/.config/ranger/rc.conf !/home/pstyczewski/bin/back-after-edit-ranger.sh
-autocmd BufWritePost ~/.newsboat/urls !/home/pstyczewski/bin/back-after-edit-newsboat-urls.sh
+"
+"
 "}}}
 " Vim settings set... {{{
 set nocompatible " no vi-compatible
@@ -206,9 +208,9 @@ endif
 " My own mappings {{{
 
 " wstawianie z systemowego schowka
-nnoremap <c-p> :r !xsel -b<CR>
-imap <c-p> ;r !xsel -o -b<CR>a
+"nnoremap <c-p> :r !xsel -b<CR>
 vmap <c-c> ;w !xsel -i -b<CR><CR>
+imap <leader>pp ;r !xsel -o -b<CR>a
 vmap <leader>c ;w !xsel -i -b<CR>
 
 let mapleader = "\<Space>"
@@ -304,7 +306,7 @@ nmap <F9> o;r !nwt<space>
 
 imap <F9> 0v$hyddo;r !nwt 0
 
-"autocmd FileType markdown nnoremap <F4> :w<cr>:!pandoc % --pdf-engine=lualatex --toc -V toc-title:"Spis treści" -V mainfont="calibri.ttf" -V colorlinks -V urlcolor=NavyBlue -o %:r.pdf <cr>
+"autocmd FileType markdown nnoremap <leader>pan :w<cr>:!pandoc % --pdf-engine=lualatex --toc -V toc-title:"Spis treści" -V mainfont="calibri.ttf" -V colorlinks -V urlcolor=NavyBlue -o %:r.pdf <cr>
 nnoremap <F2> :w<cr>:Vimwiki2HTML<CR>:! vim -s /home/pstyczewski/bin/vimcolorvimwiki.vim /home/pstyczewski/encfs/notes/wiki_html/%:r.html<CR>
 nnoremap <F4> :w<cr>:Vimwiki2HTML<CR>:! vim -s /home/pstyczewski/bin/vimcolorvimwiki.vim /home/pstyczewski/encfs/notes/wiki_html/%:r.html<CR>:! chromium --headless --disable-gpu --print-to-pdf-no-header --print-to-pdf=/home/pstyczewski/Dokumenty/generowane-vimwiki/%:r.pdf /home/pstyczewski/encfs/notes/wiki_html/%:r.html<CR>:! zathura /home/pstyczewski/Dokumenty/generowane-vimwiki/%:r.pdf&<CR>
 
@@ -349,7 +351,7 @@ nmap <leader>ą ;S/{ą,ż,ś,ź,ę,ć,ń,ó,ł,Ą,Ż,Ś,Ź,Ę,Ć,Ń,Ó,Ł}/{a,z,
 nmap <leader>Ą ;%S/{ą,ż,ś,ź,ę,ć,ń,ó,ł,Ą,Ż,Ś,Ź,Ę,Ć,Ń,Ó,Ł}/{a,z,s,z,e,c,n,o,l,A,Z,S,Z,E,C,N,O,L}/g<CR>
 
 " konwersja cudzysłowów z wersji 'do druku' na komputerowe
-nmap <leader>cudz ;%S/{„,”,‛,’,—}/{\",\",',',-}/g<CR>
+nnoremap <leader>cudz ;%S/{„,”,‛,’,—}/{\",\",',',-}/g<CR>
 
 " zamień spacje znakiem - w lini bądź w całym pliku
 nmap <leader>- ;s/\s\+/-/g<CR>
@@ -450,9 +452,11 @@ nmap  `  <Plug>(choosewin)
 let g:choosewin_overlay_enable = 1
 "}}}
 " Airline {{{
-let g:airline_powerline_fonts = 0
+let g:airline_powerline_fonts = 1
 let g:airline_theme = 'bubblegum'
+"let g:airline_solarized_bg='dark'
 let g:airline#extensions#whitespace#enabled = 0
+" let g:airline#extensions#tabline#enabled = 1
 "}}}
 " Vimwiki {{{
 let g:vimwiki_list = [{'path': '$HOME/encfs/notes/wiki'}]
@@ -543,8 +547,8 @@ nmap <leader>ile <Esc>0v$h<space>?=
 "}}}
 " Pickachu {{{
 let g:pickachu_default_date_format = "%A %d/%m/%Y"
-"imap <C-k> <ESC>;Pickachu date<CR>
-imap <C-f> <ESC>;Pickachu file<CR>
+imap … <ESC>;Pickachu date<CR>
+imap æ <ESC>;Pickachu file<CR>
 " }}}
 " YCM - AutocompleteMe {{{
 let g:ycm_autoclose_preview_window_after_completion=1
@@ -591,13 +595,18 @@ nnoremap [Q :cfirst<CR>
 nnoremap ]Q :clast<CR>
 
 "}}}
-
+"{{{ Funkcje
+command CurLineYellow :highlight CursorLine ctermfg=233 ctermbg=192
+command CurLineRed :highlight CursorLine ctermfg=233 ctermbg=203
+command CurLineGreen :highlight CursorLine ctermfg=233 ctermbg=46
+command CurLineBlue :highlight CursorLine ctermfg=233 ctermbg=87
+command CurLineBlack :highlight CursorLine ctermfg=252 ctermbg=236
 
 " functions for file extension '.pdf'.
 function! NFH_pdf(f)
     execute '!zathura' a:f
 endfunction
-
+" }}}
 
 :source ~/Dropbox/vim/abbreviations.vim
 nmap <leader>ab ;e ~/Dropbox/vim/abbreviations.vim<cr>
