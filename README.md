@@ -1,13 +1,14 @@
 # Pliki konfiguracyjne (Paweł Styczewski)
 
-Choć pliki te umieszczam na github dla własnego pożytku, możesz z nich dowolnie korzystać dostosowując je do swoich potrzeb.
+Choć pliki te umieszczam na github dla własnego pożytku (kopia, dostęp z każdego miejsca), możesz z nich dowolnie korzystać dostosowując je do swoich potrzeb.
 
 ## Ustawienia dla programów terminalowych
-Jestem olbrzymim fanem terminala i programów uruchamianych w "czarnym okienku"
+Lubię terminal i programy w nim uruchamiane
 
 - VIM  (edytor tekstu)
 - Ranger (manedżer plików)
 - Newsboat (czytnik kanałów RSS)
+- Tmux
 
 ## Zrzuty ekranu
 - VIM
