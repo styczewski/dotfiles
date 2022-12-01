@@ -11,6 +11,7 @@ Lubię terminal i programy w nim uruchamiane
 - Tmux
 - i3wm - menedżer okien
 - Terminator
+- ZSH
 
 ## Zrzuty ekranu
 - VIM
