@@ -1,0 +1,95 @@
+[global_config]
+  borderless = True
+  tab_position = hidden
+[keybindings]
+  zoom_in = <Shift><Alt>k
+  zoom_out = <Shift><Alt>j
+  go_up = <Primary><Alt>k
+  go_down = <Primary><Alt>j
+  go_left = <Primary><Alt>h
+  go_right = <Primary><Alt>l
+  split_horiz = <Alt>o
+  split_vert = <Alt>i
+  page_up = <Shift><Alt>u
+  page_down = <Shift><Alt>d
+  page_up_half = <Alt>u
+  page_down_half = <Alt>d
+  line_up = <Alt>k
+  line_down = <Alt>j
+  resize_up = <Primary><Shift>k
+  resize_down = <Primary><Shift>j
+  resize_left = <Primary><Shift>h
+  resize_right = <Primary><Shift>l
+  layout_launcher = ""
+[profiles]
+  [[default]]
+    icon_bell = False
+    background_color = "#282828"
+    background_darkness = 0.61
+    cursor_color = "#aaaaaa"
+    font = Liberation Mono 12
+    foreground_color = "#ebdbb2"
+    show_titlebar = False
+    scrollbar_position = hidden
+    palette = "#282828:#cc241d:#98971a:#d79921:#458588:#b16286:#689d6a:#a89984:#928374:#fb4934:#b8bb26:#fabd2f:#83a598:#d3869b:#8ec07c:#ebdbb2"
+    background_image = /home/pstyczewski/Pictures/grunge-DARK-1440P.jpg
+  [[ubuntu]]
+    icon_bell = False
+    background_color = "#300a24"
+    background_darkness = 0.54
+    cursor_color = "#aaaaaa"
+    foreground_color = "#ffffff"
+    show_titlebar = False
+    scrollbar_position = hidden
+  [[ciemny]]
+    icon_bell = False
+    background_color = "#282828"
+    cursor_color = "#aaaaaa"
+    foreground_color = "#ebdbb2"
+    show_titlebar = False
+    scrollbar_position = hidden
+    palette = "#282828:#cc241d:#98971a:#d79921:#458588:#b16286:#689d6a:#a89984:#928374:#fb4934:#b8bb26:#fabd2f:#83a598:#d3869b:#8ec07c:#ebdbb2"
+  [[jasny]]
+    icon_bell = False
+    background_color = "#fbf1c7"
+    cursor_color = "#aaaaaa"
+    foreground_color = "#3c3836"
+    show_titlebar = False
+    scrollbar_position = hidden
+  [[czas]]
+    allow_bold = False
+    icon_bell = False
+    background_darkness = 0.8
+    background_type = transparent
+    cursor_color = "#aaaaaa"
+    font = Sans 3
+    foreground_color = "#00ff00"
+    show_titlebar = False
+    scrollbar_position = hidden
+    use_system_font = False
+  [[nwt]]
+    icon_bell = False
+    background_color = "#282828"
+    cursor_color = "#aaaaaa"
+    font = Iosevka Medium 14
+    foreground_color = "#ebdbb2"
+    show_titlebar = False
+    scrollbar_position = hidden
+    palette = "#282828:#cc241d:#98971a:#d79921:#458588:#b16286:#689d6a:#a89984:#928374:#fb4934:#b8bb26:#fabd2f:#83a598:#d3869b:#8ec07c:#ebdbb2"
+    use_system_font = False
+  [[zielone-na-czarnym]]
+    background_darkness = 0.9
+    cursor_color = "#aaaaaa"
+    foreground_color = "#00ff00"
+    show_titlebar = False
+    scrollbar_position = hidden
+[layouts]
+  [[default]]
+    [[[window0]]]
+      type = Window
+      parent = ""
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+      profile = default
+[plugins]

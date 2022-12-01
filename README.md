@@ -1,6 +1,6 @@
 # Pliki konfiguracyjne (Paweł Styczewski)
 
-Choć pliki te umieszczam na github dla własnego pożytku (kopia, dostęp z każdego miejsca), możesz z nich dowolnie korzystać dostosowując je do swoich potrzeb.
+Pliki te umieszczam na github dla własnego pożytku (kopia, dostęp z każdego miejsca) ale możesz z nich dowolnie korzystać dostosowując je do swoich potrzeb.
 
 ## Ustawienia dla programów terminalowych
 Lubię terminal i programy w nim uruchamiane
@@ -10,6 +10,7 @@ Lubię terminal i programy w nim uruchamiane
 - Newsboat (czytnik kanałów RSS)
 - Tmux
 - i3wm - menedżer okien
+- Terminator
 
 ## Zrzuty ekranu
 - VIM
