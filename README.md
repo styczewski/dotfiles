@@ -9,6 +9,7 @@ Lubię terminal i programy w nim uruchamiane
 - Ranger (manedżer plików)
 - Newsboat (czytnik kanałów RSS)
 - Tmux
+- i3wm - menedżer okien
 
 ## Zrzuty ekranu
 - VIM
