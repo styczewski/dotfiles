@@ -1,0 +1,272 @@
+
+"  ____                    _ ____  _    _
+" |  _ \ __ ___      _____| / ___|| | _(_)
+" | |_) / _` \ \ /\ / / _ \ \___ \| |/ / |
+" |  __/ (_| |\ V  V /  __/ |___) |   <| |
+" |_|   \__,_| \_/\_/ \___|_|____/|_|\_\_|
+"
+" Zmieniono: pon, 19 wrz 2022, 18:52:10 CEST
+
+colorscheme murphy
+set background=dark
+
+" zmiana koloru tła - jasne/ciemne
+nmap <C-b> ;let &background = ( &background == "dark"? "light" : "dark" )<CR>
+
+" Vim settings set... 
+set nocompatible " no vi-compatible
+set shortmess+=c
+set wrap
+set hidden
+set cm=blowfish2
+set expandtab "tabs and spaces handling
+set tabstop=4 "tabs and spaces handling
+set softtabstop=4 "tabs and spaces handling
+set shiftwidth=4 "tabs and spaces handling
+set rtp+=~/.fzf "fuzzy finder
+set ls=2 " always show status bar
+
+set incsearch " incremental search
+set nohlsearch " highlighted search results
+set ignorecase " Ignoring case in a pattern
+set smartcase " Ignoring case in a pattern
+set number " show line numbers
+set relativenumber "relative numbers
+set splitbelow splitright
+set completeopt=menuone,longest
+set scrolloff=0 " when scrolling, keep cursor x lines away from screen border
+set wildmenu " podpowiedzi dla komend systemowych i uzupełnianie nazw plików
+set confirm " pytaj o potwierdzenie zamiast odmawiać wykonania operacji
+set timeoutlen=1000 ttimeoutlen=0 " Eliminating delays on ESC in vim and
+set showcmd
+
+" better backup, swap and undos storage
+set directory=~/.vim/dirs/tmp     " directory to place swap files in
+set backup                        " make backup files
+set backupdir=~/.vim/dirs/backups " where to put backup files
+set undofile                      " persistent undos - undo after you re-open the file
+set undodir=~/.vim/dirs/undos
+set viminfo+=n~/.vim/dirs/viminfo
+
+syntax on " syntax highlight on
+
+"set spelllang=pl "sprawdzanie pisowni
+setlocal nospell
+set complete+=kspell
+
+" set listchars=tab:▸\ ,eol:¬,trail:_
+
+" settings for hidden chars
+set listchars=tab:▒░,trail:▓,nbsp:░
+" \u2592\u2591 are used for tab, \u2593 for trailing spaces in line, and \u2591 for nbsp.
+" In Vim help they suggest using ">-" for tab and "-" for trail.
+
+" change showbreak when line numbers are on or off.
+" show no char when line numbers are on, and \u21aa otherwise.
+au OptionSet number :if v:option_new | set showbreak= |
+                   \ else | set showbreak=↪ |
+                   \ endif
+
+au FileType sh let g:sh_fold_enabled=5
+au FileType sh let g:is_bash=1
+au FileType sh set foldmethod=syntax
+
+let g:sh_fold_enabled=7
+set fdm=syntax
+sy on
+
+au FileType markdown syn region myMkdHeaderFold
+        \ start="\v^\s*\z(\#{1,6})"
+        \ skip="\v(\n\s*\z1\#)\@="
+        \ end="\v\n(\s*\#)\@="ms=s-1,me=s-1
+        \ fold contains=myMkdHeaderFold
+
+au FileType markdown syn sync fromstart
+au FileType markdown set foldmethod=syntax
+
+
+set lazyredraw
+
+" Moje własne mapowania 
+
+" wstawianie z systemowego schowka
+"nnoremap <c-p> :r !xsel -b<CR>
+vmap <c-c> ;w !xsel -i -b<CR><CR>
+imap <leader>pp ;r !xsel -o -b<CR>a
+vmap <leader>c ;w !xsel -i -b<CR>
+
+" uruchamianie skryptu python
+nnoremap <C-p> :w:! clear; python3 %<cr>
+
+" spacja nierozdzielająca
+imap <C-Space>  
+
+let mapleader = "\<Space>"
+"let mapleader = ","
+nnoremap ; :
+nnoremap : ;
+vnoremap ; :
+vnoremap : ;
+nnoremap zl zL
+nnoremap zh zH
+vnoremap . <ESC>v)
+vnoremap , (<ESC>v(
+vnoremap n j<ESC>V
+vnoremap m k<ESC>V
+inoremap UU <Esc>hviWgUe
+inoremap Uu <Esc>bviwgu~ea
+inoremap uu <Esc>bviwguea
+inoremap ąą <Esc>[sz=
+nnoremap <leader>da :r! date '+\%Y-\%m-\%d'<CR>
+nnoremap <leader>dda :r! date<CR>
+nnoremap <leader>toda ?^-\s\d\zsviW3ly''f]a - 0 -
+nmap <leader>wer ^v$hy;r! nwt 0zzvipojgq
+nmap <leader>codo ;set hls/\[\s\]
+nmap <leader>t ostr<tab>
+nmap T k;r!date +"\%s \%H:\%M:\%S" <CR>viw"ayjviw"bykO=a-b<CR>;s#\d\+\ze#\=system('printf "%02d:%02d:%02d" $(('.submatch(0).'/3600)) $(('.submatch(0).'%3600/60)) $(('.submatch(0).'%60))')I - ddpkJA - =a-bs
+
+" cofanie porcjami, dzięki utworzeniu break poins
+inoremap , ,<c-g>u
+inoremap . .<c-g>u
+inoremap ? ?<c-g>u
+inoremap ! !<c-g>u
+"inoremap <space> <space><c-g>u - niemożliwe z uwagi na abbreviations
+
+" autouzupełnianie nawiasów i cudzysłowów
+" inoremap "" ""<left>
+" inoremap '' ''<left>
+inoremap "" „”<left>
+inoremap (( ()<left>
+inoremap [[ []<left>
+inoremap {{ {}<left>
+inoremap {<CR> {<CR>}<ESC>O
+inoremap <C-l> <ESC>la
+
+" zapisz jako root
+ca w!! w !sudo tee "%"
+
+" wstaw numer linii do pliku
+nmap <leader>linia ;%s/^/\=printf('%02d-', line('.'))<cr>
+
+" zamknij inne zawinięcia poza bieżącym
+nnoremap ,z zMzvzt
+
+" wyśrodkowanie wyników wyszukiwania (rozwijanie zawinięć)
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+" przesuwanie linii oraz dodawanie nowych
+no <C-k> ddkP
+no <C-j> ddp
+no <C-l> o<ESC>k
+no <C-h> O<ESC>j
+
+" nawigacja w zakładkach
+nnoremap <leader>tn :tabn<CR>
+nnoremap <leader>tp :tabp<CR>
+nnoremap <leader>tm :tabm
+nnoremap <leader>tt :tabnew<CR>
+nnoremap <PageDown> :silent bn<CR> :redraw!<CR>
+nnoremap <PageUp> :silent bp<CR> :redraw!<CR>
+
+" podziel okno
+nnoremap <leader>ts :new<CR>
+nnoremap <leader>tv :vnew<CR>
+
+" zmień podział ekranu z pionowego na poziomy
+map <leader><right> <C-w>t<C-w>H
+map <leader><down> <C-w>t<C-w>K
+
+" zmiana rozmiaru podzielonych okien
+nnoremap <left>  :3wincmd <<cr>
+nnoremap <right> :3wincmd ><cr>
+nnoremap <up>    :3wincmd +<cr>
+nnoremap <down>  :3wincmd -<cr>
+
+" Easy line wrapping
+imap gq <ESC>gw}0A
+nnoremap <leader>gq vipgq
+
+" Set wrapping
+nmap <leader>wrap ;set wrap linebreak nocursorline<CR>
+
+" zaznacz wszystko
+nnoremap <leader>a ggVG
+
+" zakmnij bufor pliku
+nnoremap <leader>x :close<CR>
+
+" zmień katalog pracy
+nnoremap <leader>cd :cd %:p:h<CR>:pwd<CR>
+
+" włącz i wyłącz autokomentowanie
+nnoremap <leader>c :setlocal formatoptions-=cro<CR>
+nnoremap <leader>C :setlocal formatoptions=cro<CR>
+
+" włącz i wyłącz autowcięcia
+nnoremap <leader>i :setlocal autoindent<CR>
+nnoremap <leader>I :setlocal noautoindent<CR>
+
+" usuń polskie znaki z linii lub całego pliku - zależne od 'tpope/vim-abolish'
+nmap <leader>ą ;S/{ą,ż,ś,ź,ę,ć,ń,ó,ł,Ą,Ż,Ś,Ź,Ę,Ć,Ń,Ó,Ł}/{a,z,s,z,e,c,n,o,l,A,Z,S,Z,E,C,N,O,L}/g<CR>
+nmap <leader>Ą ;%S/{ą,ż,ś,ź,ę,ć,ń,ó,ł,Ą,Ż,Ś,Ź,Ę,Ć,Ń,Ó,Ł}/{a,z,s,z,e,c,n,o,l,A,Z,S,Z,E,C,N,O,L}/g<CR>
+
+" konwersja cudzysłowów z wersji 'do druku' na komputerowe
+nnoremap <leader>cudz ;%S/{„,”,‛,’,—}/{\",\",',',-}/g<CR>
+
+" zamień spacje znakiem - w lini bądź w całym pliku
+nmap <leader>- ;s/\s\+/-/g<CR>
+nmap <leader>_ ;%s/\s\+/-/g<CR>
+
+" usuń spacje na końcach linii
+nmap <Leader>1 ;%s/\s\+$//e<cr>
+
+" zastąp wiele pustych liń jedną
+nmap <Leader>2 ;%s/\(\n\n\)\n\+/\1/<cr>
+
+" szukaj zaznaczonego tekstu
+vnoremap // y/\V<C-R>=escape(@",'/\')<CR><CR>
+
+" zastępuj ostatnio szukany ciąg za pomocą ... (możesz użyć * aby wyszukać słowo pod kursorem)
+nnoremap <leader>r :%s///g<left><left>
+nnoremap <leader>rc :%s///gc<left><left><left>
+
+" j.w. ale w zaznaczeniu
+xnoremap <leader>r :s///g<left><left>
+xnoremap <leader>rc :s///gc<left><left><left>
+
+" zastąp całe słowo pod kursorem; następnie przez kropkę szukaj i powtarzaj następne zastąpienie
+nnoremap <silent> s* :let @/='\<'.expand('<cword>').'\>'<CR>cgn
+xnoremap <silent> s* "sy:let @/=@s<CR>cgn
+
+" szukaj w poprzednim zaznaczeniu "
+vmap <leader>f ;s/\%V
+
+" po wyszukaniu wyświetl wyniki w nowej karcie
+nnoremap <silent> <F3> :redir @a<CR>:g//<CR>:redir END<CR>:tabnew<CR>:put! a<CR>
+
+nnoremap <leader>p :set list!<cr>
+nnoremap <leader>s :setlocal spell!<CR>
+nnoremap <leader>pl :setlocal spell spelllang=pl<CR>
+nnoremap <leader>en :setlocal spell spelllang=en<CR>
+
+"macro
+nnoremap Q @q
+vmap Q ;norm @q<CR>
+nnoremap K @k
+vmap K ;norm @k<CR>
+
+"nawigacja w zawijanych wierszach
+nnoremap j gj
+nnoremap gj j
+nnoremap k gk
+nnoremap gk k
+
+" przeglądanie plików NETRW 
+let g:netrw_banner=0
+let g:netrw_browse_split=4
+
+:source ~/Dropbox/vim/abbreviations.vim
+nmap <leader>ab ;e ~/Dropbox/vim/abbreviations.vim<cr>
+
+" vim:foldmethod=marker:foldlevel=0
