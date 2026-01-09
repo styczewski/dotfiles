@@ -149,7 +149,6 @@ nnoremap <leader>gq vipgq
 
 let g:bullets_enabled_filetypes = ['markdown', 'text', 'gitcommit']
 let g:bullets_outline_levels = ['num', 'abc', 'std-', 'std*', 'std+']
-let g:bullets_line_spacing = 2 " default = 1
 
 let g:EasyMotion_startofline = 1 " keep cursor column when JK motion
 map  <leader>/ <Plug>(easymotion-sn)
@@ -299,23 +298,45 @@ augroup END
 augroup MarkdownSurround
     autocmd!
     " Definicje skrótów: S + litera koloru w trybie wizualnym
-    autocmd FileType markdown let b:surround_{char2nr('r')} = ">R \r R<"
-    autocmd FileType markdown let b:surround_{char2nr('b')} = ">B \r B<"
-    autocmd FileType markdown let b:surround_{char2nr('g')} = ">G \r G<"
-    autocmd FileType markdown let b:surround_{char2nr('y')} = ">Y \r Y<"
-    autocmd FileType markdown let b:surround_{char2nr('p')} = ">P \r P<"
-    autocmd FileType markdown let b:surround_{char2nr('o')} = ">O \r O<"
+    autocmd FileType markdown let b:surround_{char2nr('r')} = ">R\rR<"
+    autocmd FileType markdown let b:surround_{char2nr('b')} = ">B\rB<"
+    autocmd FileType markdown let b:surround_{char2nr('g')} = ">G\rG<"
+    autocmd FileType markdown let b:surround_{char2nr('y')} = ">Y\rY<"
+    autocmd FileType markdown let b:surround_{char2nr('p')} = ">P\rP<"
+    autocmd FileType markdown let b:surround_{char2nr('o')} = ">O\rO<"
+    autocmd FileType markdown let b:surround_{char2nr('R')} = ">tR\rRt<"
+    autocmd FileType markdown let b:surround_{char2nr('B')} = ">tB\rBt<"
+    autocmd FileType markdown let b:surround_{char2nr('G')} = ">tG\rGt<"
+    autocmd FileType markdown let b:surround_{char2nr('Y')} = ">tY\rYt<"
+    autocmd FileType markdown let b:surround_{char2nr('P')} = ">tP\rPt<"
+    autocmd FileType markdown let b:surround_{char2nr('O')} = ">tO\rOt<"
 augroup END
+
+" Ustawienia specyficzne dla wtyczki preservim/vim-markdown
+let g:vim_markdown_conceal = 2
+let g:vim_markdown_conceal_code_blocks = 0
+let g:vim_markdown_syntax_conceal = 1
 
 augroup MarkdownColors
     autocmd!
+    " Ustawiamy poziom ukrywania bezpośrednio dla plików markdown
+    autocmd FileType markdown setlocal conceallevel=2
+    autocmd FileType markdown setlocal concealcursor=c
+
     " 1. Twoje kolory specjalne (>R ... R<)
-    autocmd FileType markdown syntax region textred start=">R" end="R<" containedin=ALL
-    autocmd FileType markdown syntax region textblue start=">B" end="B<" containedin=ALL
-    autocmd FileType markdown syntax region textgreen start=">G" end="G<" containedin=ALL
-    autocmd FileType markdown syntax region textyellow start=">Y" end="Y<" containedin=ALL
-    autocmd FileType markdown syntax region textpink start=">P" end="P<" containedin=ALL
-    autocmd FileType markdown syntax region textorange start=">O" end="O<" containedin=ALL
+    "
+    autocmd FileType markdown syntax region textred matchgroup=Conceal start=">R" end="R<" containedin=ALL concealends
+    autocmd FileType markdown syntax region textblue matchgroup=Conceal start=">B" end="B<" containedin=ALL concealends
+    autocmd FileType markdown syntax region textgreen matchgroup=Conceal start=">G" end="G<" containedin=ALL concealends
+    autocmd FileType markdown syntax region textyellow matchgroup=Conceal start=">Y" end="Y<" containedin=ALL concealends
+    autocmd FileType markdown syntax region textpink matchgroup=Conceal start=">P" end="P<" containedin=ALL concealends
+    autocmd FileType markdown syntax region textorange matchgroup=Conceal start=">O" end="O<" containedin=ALL concealends
+    autocmd FileType markdown syntax region hired matchgroup=Conceal start=">tR" end="Rt<" containedin=ALL concealends
+    autocmd FileType markdown syntax region hiblue matchgroup=Conceal start=">tB" end="Bt<" containedin=ALL concealends
+    autocmd FileType markdown syntax region higreen matchgroup=Conceal start=">tG" end="Gt<" containedin=ALL concealends
+    autocmd FileType markdown syntax region hiyellow matchgroup=Conceal start=">tY" end="Yt<" containedin=ALL concealends
+    autocmd FileType markdown syntax region hipink matchgroup=Conceal start=">tP" end="Pt<" containedin=ALL concealends
+    autocmd FileType markdown syntax region hiorange matchgroup=Conceal start=">tO" end="Ot<" containedin=ALL concealends
 
     " 2. Definicja nagłówków z wymuszeniem priorytetu
     " Używamy 'syntax region', bo jest 'silniejszy' od 'match'
@@ -360,6 +381,13 @@ hi textgreen ctermfg=green guifg=#00ff00
 hi textyellow ctermfg=yellow guifg=#ffff00
 hi textpink ctermfg=98 guifg=#875faf
 hi textorange ctermfg=166 guifg=#d75f00
+
+hi hired    ctermfg=0 ctermbg=167 guifg=#000000 guibg=#fb4934
+hi hiblue   ctermfg=0 ctermbg=109 guifg=#000000 guibg=#83a598
+hi higreen  ctermfg=0 ctermbg=142 guifg=#000000 guibg=#b8bb26
+hi hiyellow ctermfg=0 ctermbg=214 guifg=#000000 guibg=#fabd2f
+hi hipink   ctermfg=0 ctermbg=175 guifg=#000000 guibg=#d3869b
+hi hiorange ctermfg=0 ctermbg=208 guifg=#000000 guibg=#fe8019
 
 " Szybki Python
 augroup PythonRun
