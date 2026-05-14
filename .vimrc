@@ -3,7 +3,7 @@
 " | |_) / _` \ \ /\ / / _ \ \___ \| |/ / |
 " |  __/ (_| |\ V  V /  __/ |___) |   <| |
 " |_|   \__,_| \_/\_/ \___|_|____/|_|\_\_|
-" Zoptymalizowana wersja: 2024
+" Zoptymalizowana wersja: 2026
 
 " Vim-plug initialization {{{
 let vim_plug_just_installed = 0
@@ -32,8 +32,7 @@ Plug 'vim-airline/vim-airline-themes'
 
 " FZF - Ładowane na żądanie
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim', { 'on': ['Files', 'GFiles', 'Buffers', 'History', 'Ag', 'Rg', 'FZFLines'] }
-Plug 'chengzeyi/fzf-preview.vim', { 'on': 'FzfPreviewProjectFiles' }
+Plug 'junegunn/fzf.vim'
 
 " Narzędzia tekstowe i edycja
 Plug 'tpope/vim-surround'
@@ -42,12 +41,15 @@ Plug 'tpope/vim-commentary'
 Plug 'suy/vim-context-commentstring'
 "Plug 'preservim/nerdcommenter'
 Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
-Plug 'easymotion/vim-easymotion', { 'on': ['<Plug>(easymotion-prefix)', '<Plug>(easymotion-s)'] }
+Plug 'easymotion/vim-easymotion'
 Plug 'kshenoy/vim-signature'
-Plug 'vim-scripts/VisIncr', { 'on': 'VisIncr' }
 Plug 'navicore/vissort.vim'
+Plug 'vim-scripts/visSum.vim'
+Plug 'tpope/vim-speeddating'
 Plug 'markonm/traces.vim' " Dynamiczne podglądanie search/replace (bardzo wydajne)
 Plug 'dkarter/bullets.vim'
+Plug 'dhruvasagar/vim-table-mode'
+Plug 'itchyny/calendar.vim'
 
 " Języki i formaty
 Plug 'vimwiki/vimwiki', { 'for': 'vimwiki' }
@@ -81,8 +83,10 @@ filetype plugin indent on
 syntax on
 
 set encoding=utf-8
+set spelllang=pl,en
 set background=dark
-silent! colorscheme gruvbox8_soft
+silent! colorscheme gruvbox8_hard
+
 
 " Wydajność UI
 set lazyredraw            " Nie odświeżaj ekranu podczas makr
@@ -95,7 +99,7 @@ set expandtab
 set tabstop=2
 set softtabstop=2
 set shiftwidth=2
-set textwidth=140
+set textwidth=100
 set wrap
 set linebreak
 set autoindent
@@ -130,29 +134,223 @@ for d in [&directory, &backupdir, &undodir]
 endfor
 " }}}
 
-" Easymotion {{{
-map <Leader> <Plug>(easymotion-prefix)
-let g:EasyMotion_do_mapping = 0 " Disable default mappings
-" Turn on case insensitive feature
-let g:EasyMotion_smartcase = 1
+" Ustawia poziom otwarcia fałd na bardzo wysoki przy starcie
+" Dzięki temu wszystkie sekcje będą rozwinięte
+set foldlevelstart=99
 
-" s{char} to move to {char}
-map <Leader>s <Plug>(easymotion-s)
-
-" JK motions: Line motions
-map <Leader>j <Plug>(easymotion-j)
-map <Leader>k <Plug>(easymotion-k)
+" Wyłączenie automatycznego zwijania wtyczki vim-markdown
+let g:vim_markdown_folding_disabled = 1
 
 " Easy line wrapping
 imap gq <ESC>gw}0A
 nnoremap <leader>gq vipgq
 
 let g:bullets_enabled_filetypes = ['markdown', 'text', 'gitcommit']
-let g:bullets_outline_levels = ['num', 'abc', 'std-', 'std*', 'std+']
+let g:bullets_outline_levels = ['num', 'num', 'abc', 'std-', 'std*', 'std+']
+let g:bullets_checkbox_markers = ' .)'
+let g:bullets_renumber_on_change = 1 " 1 = włączone, 0 = wyłączone
 
-let g:EasyMotion_startofline = 1 " keep cursor column when JK motion
-map  <leader>/ <Plug>(easymotion-sn)
-omap <leader>/ <Plug>(easymotion-tn)
+" Domyślnie wyłączamy mapowania wtyczki przy starcie (opcjonalnie)
+let g:bullets_set_mappings = 1
+
+function! ToggleBulletsMappings()
+    if !exists('b:bullets_enabled')
+        let b:bullets_enabled = 0
+    endif
+
+    if b:bullets_enabled == 0
+        " AKTYWACJA: Przypisujemy skróty wtyczki do bufora
+        silent! nnoremap <buffer> >> <Plug>(bullets-demote)
+        silent! nnoremap <buffer> << <Plug>(bullets-promote)
+        silent! vnoremap <buffer> >  <Plug>(bullets-v-demote)
+        silent! vnoremap <buffer> <  <Plug>(bullets-v-promote)
+        let b:bullets_enabled = 1
+        echo "Bullets.vim: AKTYWNE (Inteligentne listy)"
+    else
+        " DEZAKTYWACJA: Przywracamy standardowe działanie Vima
+        silent! nunmap <buffer> >>
+        silent! nunmap <buffer> <<
+        silent! vunmap <buffer> >
+        silent! vunmap <buffer> <
+        let b:bullets_enabled = 0
+        echo "Bullets.vim: WYŁĄCZONE (Kropka działa)"
+    endif
+endfunction
+
+" Mapowanie przełącznika pod <leader>l
+autocmd FileType markdown nnoremap <buffer> <leader>l :call ToggleBulletsMappings()<CR>
+
+
+" Nawigacja w treści markdown (po nagłówkach) {{{
+" 1. Funkcja pomocnicza, która wykonuje skok do linii
+function! s:toc_handler(line)
+    " Wyciągamy numer linii (wszystko przed pierwszym dwukropkiem)
+    let l:lineno = split(a:line, ':')[0]
+    " Skaczemy do linii i centrujemy widok
+    execute l:lineno
+    normal! zt
+endfunction
+
+" 2. Główna funkcja wywołująca FZF
+function! MarkdownFzfToc()
+    call fzf#run(fzf#wrap({
+        \ 'source': 'grep -nE "^#+" ' . shellescape(expand('%')),
+        \ 'sink': function('s:toc_handler'),
+        \ 'options': '--delimiter : --nth 2.. --prompt "TOC> " --reverse'
+        \ }))
+endfunction
+
+" 3. Komenda i mapowanie
+command! FToc call MarkdownFzfToc()
+nnoremap <C-Space> :FToc<CR>
+nmap <C-@> <C-Space>
+" }}}
+
+" Ustawienie pierwszego wolnego markera dla burofu {{{
+function! SetFirstFreeMark()
+    " Iteruj przez kody ASCII dla liter od 'a' (97) do 'z' (122)
+    for i in range(char2nr('a'), char2nr('z'))
+        let l:char = nr2char(i)
+        " Sprawdź pozycję markera. Jeśli linia wynosi 0, marker jest wolny
+        if getpos("'" . l:char)[1] == 0
+            execute 'mark ' . l:char
+            echo "Marker ustawiony na: " . l:char
+            return
+        endif
+    endfor
+    echoerr "Wszystkie markery (a-z) są już zajęte!"
+endfunction
+
+function! CalendarInsertDate()
+    let l:day_obj = b:calendar.day()
+    if empty(l:day_obj) | return | endif
+
+    try
+        let l:day   = l:day_obj.get_day()
+        let l:month = l:day_obj.get_month()
+        let l:year  = l:day_obj.get_year()
+
+        " Tabele nazw
+        let l:days_names = ['Nie', 'Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob']
+        let l:months_names = ['', 'Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru']
+
+        " OBLICZANIE DNIA TYGODNIA (Algorytm Zellera / Vim script)
+        " Zwraca 0 dla Niedzieli, 1 dla Poniedziałku itd.
+        let l:a = (14 - l:month) / 12
+        let l:y = l:year - l:a
+        let l:m = l:month + 12 * l:a - 2
+        let l:wd = (l:day + l:y + l:y/4 - l:y/100 + l:y/400 + (31*l:m)/12) % 7
+
+        " Wybór formatu
+        echo "Format: (1) 2026-02-02 (2) 02.02.2026 (3) 2 Lut 2026 (4) Pon, 2 Lut 2026"
+        let l:choice = nr2char(getchar())
+
+        if l:choice == '1'
+            let l:date = printf('%04d-%02d-%02d', l:year, l:month, l:day)
+        elseif l:choice == '2'
+            let l:date = printf('%02d.%02d.%04d', l:day, l:month, l:year)
+        elseif l:choice == '3'
+            let l:date = printf('%d %s %d', l:day, l:months_names[l:month], l:year)
+        elseif l:choice == '4'
+            let l:date = printf('%s, %d %s %d', l:days_names[l:wd], l:day, l:months_names[l:month], l:year)
+        else
+            redraw | echo "Anulowano."
+            return
+        endif
+
+        q
+        execute "normal! a" . l:date
+        redraw | echo "Wstawiono: " . l:date
+    catch
+        echo "Wystąpił błąd: " . v:exception
+    endtry
+endfunction
+
+" To wywoła mapowanie za każdym razem, gdy otworzysz kalendarz
+autocmd FileType calendar nnoremap <buffer> <CR> :call CalendarInsertDate()<CR>
+autocmd FileType calendar nnoremap <buffer> H <Plug>(calendar_prev_month)
+autocmd FileType calendar nnoremap <buffer> L <Plug>(calendar_next_month)
+autocmd FileType calendar nnoremap <buffer> K <Plug>(calendar_up_large)
+autocmd FileType calendar nnoremap <buffer> J <Plug>(calendar_down_large)
+
+" Otwórz kalendarz w wąskim oknie po prawej
+inoremap ;; <ESC>:Calendar<CR>
+
+function! ExportToWebHtml()
+    " --- KONFIGURACJA ŚCIEŻEK ---
+    let l:target_dir = "/var/www/html/notatki/"
+    let l:sed_md     = "/storage/doku/adds/sed/md_prehtml.sed"
+    let l:sed_html   = "/storage/doku/adds/sed/md_html.sed"
+    " --- WYBÓR ARKUSZA STYLÓW ---
+    let l:css_options = [
+        \ "0. bez stylu 1. standardowy, 2. skondensowany",
+        \ ""
+        \ ]
+
+    let l:choice = inputlist(["Wybierz styl CSS:", l:css_options[0], l:css_options[1]])
+
+    if l:choice == 0
+        let l:custom_css = ""
+    elseif l:choice == 1
+        let l:custom_css = "/storage/doku/adds/style2.css"
+    elseif l:choice == 2
+        let l:custom_css = "/storage/doku/adds/style3.css"
+    else
+        echo "\nAnulowano eksport."
+        return
+    endif
+
+    let l:filename   = expand('%:t:r')
+    let l:output_path = l:target_dir . l:filename . ".html"
+    let l:temp_md    = tempname() . ".md"
+
+    try
+        " 1. Przygotowanie pliku tymczasowego i pierwszy SED
+        let l:current_content = getline(1, '$')
+        call writefile(l:current_content, l:temp_md)
+
+        if filereadable(l:sed_md)
+            call system("sed -i -f " . shellescape(l:sed_md) . " " . shellescape(l:temp_md))
+        endif
+
+        " 2. Konwersja Pandoc z WBUDOWANYM CSS
+        " --embed-resources (dawniej --self-contained) sprawia, że CSS ląduje wewnątrz HTML
+        " --css wskazuje plik, który ma zostać wbudowany
+        let l:pandoc_cmd = "pandoc " . shellescape(l:temp_md) .
+            \ " -s" .
+            \ " --css=" . shellescape(l:custom_css) .
+            \ " --embed-resources" .
+            \ " --standalone" .
+            \ " -o " . shellescape(l:output_path)
+
+        let l:out_pandoc = system(l:pandoc_cmd)
+
+        if v:shell_error
+            " Jeśli Twoja wersja Pandoca jest starsza, spróbuj zamienić --embed-resources na --self-contained
+            let l:pandoc_cmd_old = "pandoc " . shellescape(l:temp_md) . " -s --css=" . shellescape(l:custom_css) . " --self-contained -o " . shellescape(l:output_path)
+            let l:out_pandoc = system(l:pandoc_cmd_old)
+        endif
+
+        " 3. Drugi SED (post-procesing gotowego HTML)
+        if filereadable(l:output_path) && filereadable(l:sed_html)
+            call system("sed -i -f " . shellescape(l:sed_html) . " " . shellescape(l:output_path))
+        endif
+
+        redraw | echo "✓ Eksport zakończony (CSS wbudowany)!"
+
+    catch
+        echoerr "Wystąpił błąd: " . v:exception
+    finally
+        if filereadable(l:temp_md) | call delete(l:temp_md) | endif
+    endtry
+endfunction
+
+" Mapowanie pod klawisz lidera + p
+autocmd FileType markdown nnoremap <buffer> <leader>p :call ExportToWebHtml()<CR>
+
+" Mapowanie pod 'mm' (Mark Machine-gun / Mark Mine)
+nnoremap mm :call SetFirstFreeMark()<CR>
+nnoremap m<BS> :delmarks a-z<CR>:echo "Wyczyszczono markery a-z"<CR>
 " }}}
 
 " Autokomendy (Optymalizacja: użycie augroup) {{{
@@ -170,7 +368,7 @@ augroup MyCustomAutocmds
     autocmd FileType html setlocal omnifunc=htmlcomplete#CompleteTags
     autocmd FileType markdown setlocal formatoptions=jcroqlnt
     autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-    
+
     " Dynamiczny Showbreak
     autocmd OptionSet number if v:option_new | set showbreak= | else | set showbreak=↳ | endif
 augroup END
@@ -197,23 +395,40 @@ function! ToggleHiddenAll()
 endfunction
 " }}}
 
-" Easymotion {{{
-map <Leader> <Plug>(easymotion-prefix)
-let g:EasyMotion_do_mapping = 0 " Disable default mappings
-" Turn on case insensitive feature
-let g:EasyMotion_smartcase = 1
+" Zmienna pomocnicza do śledzenia stanu
+let g:cursorline_highvis = 0
 
-" s{char} to move to {char}
-map <Leader>s <Plug>(easymotion-s)
+function! ToggleCursorHighVis()
+    if g:cursorline_highvis == 0
+        " --- TRYB WYSOKIEJ WIDOCZNOŚCI ---
+        " CursorLine - linia, na której stoi kursor
+        " Visual - tekst zaznaczony myszką/klawiaturą
+        " Czarny tekst (#000000), Zielone tło (Gruvbox Green #b8bb26)
+        hi CursorLine ctermfg=0 ctermbg=142 guifg=#000000 guibg=#b8bb26 cterm=NONE gui=NONE
+        hi Visual     ctermfg=0 ctermbg=142 guifg=#000000 guibg=#b8bb26
+        
+        let g:cursorline_highvis = 1
+        echo "Tryb High-Vis: ON"
+    else
+        " --- POWRÓT DO DOMYŚLNYCH ---
+        " Czyścimy nadpisane grupy, co przywraca ustawienia z colorscheme
+        hi clear CursorLine
+        hi clear Visual
+        
+        " Ponowne załadowanie schematu kolorów, aby przywrócić oryginalne wartości
+        execute 'colorscheme ' . g:colors_name
+        
+        let g:cursorline_highvis = 0
+        echo "Tryb High-Vis: OFF"
+    endif
+endfunction
 
-" JK motions: Line motions
-map <Leader>j <Plug>(easymotion-j)
-map <Leader>k <Plug>(easymotion-k)
+" zmiana kolorystyki lini kursora na czarno zielony
+nnoremap <C-S-c> :call ToggleCursorHighVis()<CR>
 
-let g:EasyMotion_startofline = 1 " keep cursor column when JK motion
-map  <leader>/ <Plug>(easymotion-sn)
-omap <leader>/ <Plug>(easymotion-tn)
-" }}}
+
+" Otwieranie pliku pod kursorem w pionowym podziale (Vertical Split)
+" nnoremap gv :vertical wincmd f<CR>
 
 " Mapowania {{{
 let mapleader = "\<Space>"
@@ -223,6 +438,23 @@ nnoremap ; :
 nnoremap : ;
 vnoremap ; :
 vnoremap : ;
+vnoremap . <ESC>v)
+vnoremap , (<ESC>v(
+vnoremap n j<ESC>V
+vnoremap m k<ESC>V
+inoremap UU <Esc>hviWgUe
+inoremap Uu <Esc>bviwgu~ea
+inoremap uu <Esc>bviwguea
+inoremap ąą <Esc>[sz=
+
+" Otwiera plik pod kursorem, a jeśli nie istnieje - tworzy nowy bufor
+" nnoremap gf :tabedit <cfile><CR>
+
+" cofanie porcjami, dzięki utworzeniu break points
+inoremap , ,<c-g>u
+inoremap . .<c-g>u
+inoremap ? ?<c-g>u
+inoremap ! !<c-g>u
 
 " Systemowy schowek (wymaga xsel)
 nnoremap <c-p> :r !xsel -b<CR>
@@ -247,12 +479,17 @@ no <C-l> o<ESC>k
 no <C-h> O<ESC>j
 
 "macro
+let @k ="/akpztkjj}"
+let @u ="?akpnk}"
+let @q ="?akp*ztj}"
 nnoremap Q @q
 vmap Q ;norm @q<CR>
 nnoremap K @k
 vmap K ;norm @k<CR>
 nnoremap U @u
 vmap U ;norm @u<CR>
+
+
 
 "nawigacja w zawijanych wierszach
 nnoremap j gj
@@ -281,16 +518,22 @@ nnoremap <leader>f :Files<CR>
 nnoremap <leader>b :Buffers<CR>
 nnoremap <leader>o :FZF<CR>
 
+nnoremap <leader>t :TableModeToggle<CR>
+
 augroup MarkdownLists
     autocmd!
-    " n - rozpoznawanie list numerowanych podczas formatowania
-    " r - automatyczne wstawianie lidera listy po Enter w trybie Insert
-    " o - automatyczne wstawianie lidera po O lub o w trybie Normal
-    " q - umożliwienie formatowania komentarzy/list za pomocą gq
-    autocmd FileType markdown setlocal formatoptions+=nroq
+    " q - umożliwia formatowanie gq
+    " j - usuwa zbędne znaki lidera przy łączeniu linii
+    " r - dodaje punktor po Enter (tylko w trybie Insert)
+    " o - dodaje punktor po o/O (tylko w trybie Normal)
+    " 2 - UŻYWA WCIĘCIA DRUGIEJ LINII dla reszty akapitu (kluczowe!)
+    " Usuwamy 'n' - to ono mogło dodawać niechciane numery/punktory przy gq
+    autocmd FileType markdown setlocal formatoptions=qjro2
 
-    " Definicja wyglądu listy numerowanej (opcjonalne, pomaga przy wcięciach)
-    autocmd FileType markdown setlocal formatlistpat=^\\s*\\d\\+\\.\\s\\+
+    " Pozostałe ustawienia
+    autocmd FileType markdown setlocal breakindent
+    autocmd FileType markdown setlocal breakindentopt=shift:2
+    autocmd FileType markdown setlocal formatlistpat=^\\s*\\d\\+\\.\\s\\+\\\|^\\s*[-*+]\\s\\+
 augroup END
 
 " TEO Syntax / Kolorowanie (vnoremapy zachowane z oryginału)
@@ -337,6 +580,9 @@ augroup MarkdownColors
     autocmd FileType markdown syntax region hiyellow matchgroup=Conceal start=">tY" end="Yt<" containedin=ALL concealends
     autocmd FileType markdown syntax region hipink matchgroup=Conceal start=">tP" end="Pt<" containedin=ALL concealends
     autocmd FileType markdown syntax region hiorange matchgroup=Conceal start=">tO" end="Ot<" containedin=ALL concealends
+    autocmd FileType markdown syntax region higreen matchgroup=Conceal start=";ramkazielona" end="ramkazielona;" containedin=ALL concealends
+    autocmd FileType markdown syntax region hiblue matchgroup=Conceal start=";ramkaniebieska" end="ramkaniebieska;" containedin=ALL concealends
+    autocmd FileType markdown syntax region hired matchgroup=Conceal start=";ramkaczerwona" end="ramkaczerwona;" containedin=ALL concealends
 
     " 2. Definicja nagłówków z wymuszeniem priorytetu
     " Używamy 'syntax region', bo jest 'silniejszy' od 'match'
@@ -400,5 +646,31 @@ let g:airline_powerline_fonts = 1
 let g:airline_theme = 'bubblegum'
 let g:airline#extensions#whitespace#enabled = 0
 " }}}
+
+" EasyMotion {{{
+hi EasyMotionTarget ctermbg=none ctermfg=red
+hi EasyMotionShade  ctermfg=gray
+
+" s{char}{char} to move to {char}{char}
+nmap s <Plug>(easymotion-overwin-f2)
+
+let g:EasyMotion_do_mapping = 0 " Wyłączamy automatyczne mapy, by zdefiniować własne
+let g:EasyMotion_smartcase = 1
+let g:EasyMotion_startofline = 1
+
+" Mapowania z użyciem Twojego Leader (Spacja)
+map <Leader>s <Plug>(easymotion-s)
+map <Leader>j <Plug>(easymotion-j)
+map <Leader>k <Plug>(easymotion-k)
+map <Leader>/ <Plug>(easymotion-sn)
+map <Leader>w <Plug>(easymotion-bd-w)
+vmap f <Plug>(easymotion-bd-f)
+vmap s <Plug>(easymotion-bd-w)
+vmap F <Plug>(easymotion-bd-2f)
+
+" }}}
+
+:source /storage/doku/abbreviations.vim
+:source /storage/doku/abbreviations_osoby.vim
 
 " vim:foldmethod=marker:foldlevel=0
