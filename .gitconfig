@@ -1,0 +1,29 @@
+[core]
+	editor = vim
+
+[user]
+	email = stycewski@gmail.com
+	name = Paweł Styczewski
+
+[alias]
+    # Podstawowe komendy
+    st = status -s              # Zwięzły status (zamiast długiego git status)
+    co = checkout               # Przełączanie gałęzi / przywracanie plików
+    cb = checkout -b            # Tworzenie nowej gałęzi i natychmiastowe przejście
+    br = branch                 # Zarządzanie gałęziami
+    cm = commit -m              # Szybki commit z wiadomością
+    ca = commit --amend --no-edit # Dołączenie zmian do ostatniego commita bez zmiany wiadomości
+
+    # Zmiany i dodawanie
+    aa = add -A                 # Dodaj wszystkie zmiany
+    ap = add -p                 # Interaktywne dodawanie zmian (patch by patch)
+    df = diff                   # Podgląd niezatwierdzonych zmian
+    dfs = diff --staged         # Podgląd zmian dodanych do indexu (stage)
+
+    # Logi i drzewo (wygląda świetnie w terminalu)
+    lg = log --oneline --graph --decorate --all
+    last = log -1 HEAD --stat   # Podgląd ostatniego commita ze statystykami zmian
+
+    # Bezpieczeństwo i czyszczenie
+    unstage = restore --staged  # Wycofanie pliku ze stage'a
+    undo = reset --soft HEAD~1  # Cofnięcie ostatniego commita (zmiany zostają w pliku)
