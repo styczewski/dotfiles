@@ -74,9 +74,25 @@ plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 # [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-eval "$(fzf --zsh)"
 
 # User configuration
+
+# --- Uniwersalne ładowanie fzf ---
+if fzf --zsh &>/dev/null; then
+  # Dla fzf >= 0.48.0
+  source <(fzf --zsh)
+elif [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]; then
+  # Debian / MX Linux / Ubuntu (starsze wersje z APT)
+  source /usr/share/doc/fzf/examples/key-bindings.zsh
+  source /usr/share/doc/fzf/examples/completion.zsh
+elif [ -f /usr/share/fzf/key-bindings.zsh ]; then
+  # Arch Linux / Fedora
+  source /usr/share/fzf/key-bindings.zsh
+  source /usr/share/fzf/completion.zsh
+elif [ -f ~/.fzf.zsh ]; then
+  # Instalacja ręczna przez git clone
+  source ~/.fzf.zsh
+fi
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
