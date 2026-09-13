@@ -5,6 +5,15 @@
 	email = stycewski@gmail.com
 	name = Paweł Styczewski
 
+[color]
+	ui = true
+
+[merge]
+	tool = vimdiff
+
+[init]
+	defaultBranch = master
+
 [alias]
     # Podstawowe komendy
     st = status -s              # Zwięzły status (zamiast długiego git status)

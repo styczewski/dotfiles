@@ -3,7 +3,7 @@
 " | |_) / _` \ \ /\ / / _ \ \___ \| |/ / |
 " |  __/ (_| |\ V  V /  __/ |___) |   <| |
 " |_|   \__,_| \_/\_/ \___|_|____/|_|\_\_|
-" Zoptymalizowana wersja: 2026
+" Zoptymalizowana wersja: Nie, 13 Wrz 2026
 
 " Vim-plug initialization {{{
 let vim_plug_just_installed = 0
@@ -47,7 +47,7 @@ Plug 'navicore/vissort.vim'
 Plug 'vim-scripts/visSum.vim'
 Plug 'tpope/vim-speeddating'
 Plug 'markonm/traces.vim' " Dynamiczne podglądanie search/replace (bardzo wydajne)
-Plug 'dkarter/bullets.vim'
+Plug 'bullets-vim/bullets.vim'
 Plug 'dhruvasagar/vim-table-mode'
 Plug 'itchyny/calendar.vim'
 
@@ -86,6 +86,7 @@ set encoding=utf-8
 set spelllang=pl,en
 set background=dark
 silent! colorscheme gruvbox8_hard
+let g:goyo_width = 85
 
 
 " Wydajność UI
@@ -142,43 +143,21 @@ set foldlevelstart=99
 let g:vim_markdown_folding_disabled = 1
 
 " Easy line wrapping
-imap gq <ESC>gw}0A
+" inoremap gq <Esc>gw}0A
+inoremap gq <Esc>:set ft=<CR>gw}:set ft=markdown<CR>0A
 nnoremap <leader>gq vipgq
 
 let g:bullets_enabled_filetypes = ['markdown', 'text', 'gitcommit']
 let g:bullets_outline_levels = ['num', 'num', 'abc', 'std-', 'std*', 'std+']
 let g:bullets_checkbox_markers = ' .)'
 let g:bullets_renumber_on_change = 1 " 1 = włączone, 0 = wyłączone
-
-" Domyślnie wyłączamy mapowania wtyczki przy starcie (opcjonalnie)
+let b:bullets_enabled = 0
 let g:bullets_set_mappings = 1
-
-function! ToggleBulletsMappings()
-    if !exists('b:bullets_enabled')
-        let b:bullets_enabled = 0
-    endif
-
-    if b:bullets_enabled == 0
-        " AKTYWACJA: Przypisujemy skróty wtyczki do bufora
-        silent! nnoremap <buffer> >> <Plug>(bullets-demote)
-        silent! nnoremap <buffer> << <Plug>(bullets-promote)
-        silent! vnoremap <buffer> >  <Plug>(bullets-v-demote)
-        silent! vnoremap <buffer> <  <Plug>(bullets-v-promote)
-        let b:bullets_enabled = 1
-        echo "Bullets.vim: AKTYWNE (Inteligentne listy)"
-    else
-        " DEZAKTYWACJA: Przywracamy standardowe działanie Vima
-        silent! nunmap <buffer> >>
-        silent! nunmap <buffer> <<
-        silent! vunmap <buffer> >
-        silent! vunmap <buffer> <
-        let b:bullets_enabled = 0
-        echo "Bullets.vim: WYŁĄCZONE (Kropka działa)"
-    endif
-endfunction
-
-" Mapowanie przełącznika pod <leader>l
-autocmd FileType markdown nnoremap <buffer> <leader>l :call ToggleBulletsMappings()<CR>
+let g:bullets_outline_levels = ['-']
+silent! nunmap <buffer> >>
+silent! nunmap <buffer> <<
+silent! vunmap <buffer> >
+silent! vunmap <buffer> <
 
 
 " Nawigacja w treści markdown (po nagłówkach) {{{
@@ -204,6 +183,50 @@ endfunction
 command! FToc call MarkdownFzfToc()
 nnoremap <C-Space> :FToc<CR>
 nmap <C-@> <C-Space>
+" }}}
+
+" Nawigacja w bash po funkcjach {{{
+function! BashFzfToc()
+  let l:lines = []
+  let l:i = 1
+  let l:max = line('$')
+
+  " Elastyczny wzorzec dla funkcji w Bashu
+  let l:pattern = '^\s*\(function\s\+\)\?[a-zA-Z0-9_#-]\+\s*(\s*)'
+
+  while l:i <= l:max
+    let l:line = getline(l:i)
+    " Sprawdzenie czy linia pasuje do definicji funkcji
+    if l:line =~# l:pattern || l:line =~# '^\s*function\s\+[a-zA-Z0-9_#-]\+'
+      call add(l:lines, l:i . ':' . l:line)
+    endif
+    let l:i += 1
+  endwhile
+
+  if empty(l:lines)
+    echo "Nie znaleziono funkcji w tym pliku."
+    return
+  endif
+
+  " Wywołanie FZF z podglądem kodu
+  call fzf#run(fzf#wrap({
+        \ 'source': l:lines,
+        \ 'sink': function('s:BashTocSink'),
+        \ 'options': ['--prompt', 'Bash Functions> ', '--preview', 'bat --style=numbers --color=always --highlight-line {1} ' . shellescape(expand('%')) . ' 2>/dev/null || sed -n -e "{1}-5,{1}+15p" ' . shellescape(expand('%'))]
+        \ }))
+endfunction
+
+function! s:BashTocSink(line)
+  let l:lineNumber = split(a:line, ':')[0]
+  execute l:lineNumber
+  normal! zb
+endfunction
+
+" Rejestracja komendy i skrótu klawiszowego
+command! BToc call BashFzfToc()
+
+" Przypisanie skrótu pod Ctrl+Space w plikach sh/bash
+autocmd FileType sh,bash nnoremap <buffer> <C-Space> :BToc<CR>
 " }}}
 
 " Ustawienie pierwszego wolnego markera dla burofu {{{
@@ -360,9 +383,6 @@ augroup MyCustomAutocmds
     autocmd BufReadPost *.pdf silent set ro | silent %!pdftotext -nopgbrk -layout -q -eol unix "%" - | fmt -w78
     autocmd BufReadPost *.doc set ro | %!antiword "%"
     
-    " Typy plików
-    autocmd FileType html,javascript,htmldjango setlocal shiftwidth=2 tabstop=2 softtabstop=2
-    
     " OmniCompletion
     autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
     autocmd FileType html setlocal omnifunc=htmlcomplete#CompleteTags
@@ -417,7 +437,35 @@ function! ToggleCursorHighVis()
         
         " Ponowne załadowanie schematu kolorów, aby przywrócić oryginalne wartości
         execute 'colorscheme ' . g:colors_name
-        
+
+function! s:ApplyColorscheme(choice)
+  if !empty(a:choice)
+    execute 'colorscheme ' . a:choice
+  endif
+endfunction
+
+function! SelectColorscheme()
+  " Pobiera listę wszystkich dostępnych schematów kolorów
+  let l:schemes = globpath(&rtp, 'colors/*.vim', 0, 1)
+  let l:names = map(l:schemes, 'fnamemodify(v:val, ":t:r")')
+  
+  " Zapamiętujemy obecny motyw na wypadek anulowania (Esc)
+  let l:current_theme = get(g:, 'colors_name', 'default')
+
+  call fzf#run(fzf#wrap({
+        \ 'source': uniq(sort(l:names)),
+        \ 'sink': function('s:ApplyColorscheme'),
+        \ 'options': [
+        \   '--prompt', 'Colorscheme> ',
+        \   '--bind', 'ctrl-j:down,ctrl-k:up',
+        \   '--preview', 'vim --servername ' . v:servername . ' --remote-expr "execute(\"colorscheme {}\")" 2>/dev/null || true'
+        \ ]
+        \ }))
+endfunction
+
+" Komenda i skrót klawiszowy do wywołania podglądu
+command! Colors call SelectColorscheme()
+
         let g:cursorline_highvis = 0
         echo "Tryb High-Vis: OFF"
     endif
@@ -462,7 +510,6 @@ vmap <c-c> :w !xsel -i -b<CR><CR>
 
 " Backup i ustawienia
 nnoremap <C-S-b> :call WriteBackup()<CR>
-nnoremap <leader>rvim :source $MYVIMRC<CR>
 nnoremap <leader>vim :e $MYVIMRC<CR>
 
 " Nawigacja i okna
@@ -489,8 +536,6 @@ vmap K ;norm @k<CR>
 nnoremap U @u
 vmap U ;norm @u<CR>
 
-
-
 "nawigacja w zawijanych wierszach
 nnoremap j gj
 nnoremap gj j
@@ -515,25 +560,41 @@ nnoremap <leader>cd :cd %:p:h<CR>:pwd<CR>
 
 " FZF mappings
 nnoremap <leader>f :Files<CR>
+nnoremap <leader>l :Lines<CR>
 nnoremap <leader>b :Buffers<CR>
 nnoremap <leader>o :FZF<CR>
+" Szukaj słowa pod kursorem we wszystkich plikach pod Alt + f
+nnoremap <leader>L :Rg <C-R><C-W><CR>
+
+command! FZFRead call fzf#run(fzf#wrap({'sink': 'read'}))
+nnoremap <leader>r :FZFRead<CR>
+
+" Build a quickfix list when multiple files are selected
+function! s:build_quickfix_list(lines)
+  call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
+  copen
+  cc
+endfunction
+
+let g:fzf_action = {
+  \ 'alt-q': function('s:build_quickfix_list'),
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-h': 'split',
+  \ 'ctrl-v': 'vsplit' }
 
 nnoremap <leader>t :TableModeToggle<CR>
 
 augroup MarkdownLists
     autocmd!
-    " q - umożliwia formatowanie gq
-    " j - usuwa zbędne znaki lidera przy łączeniu linii
-    " r - dodaje punktor po Enter (tylko w trybie Insert)
-    " o - dodaje punktor po o/O (tylko w trybie Normal)
-    " 2 - UŻYWA WCIĘCIA DRUGIEJ LINII dla reszty akapitu (kluczowe!)
-    " Usuwamy 'n' - to ono mogło dodawać niechciane numery/punktory przy gq
-    autocmd FileType markdown setlocal formatoptions=qjro2
+    " q - pozwala na formatowanie, j - usuwa komcie przy łączeniu, n - inteligentne wcięcie list
+    autocmd FileType markdown,text setlocal formatoptions=qjn
 
-    " Pozostałe ustawienia
-    autocmd FileType markdown setlocal breakindent
-    autocmd FileType markdown setlocal breakindentopt=shift:2
-    autocmd FileType markdown setlocal formatlistpat=^\\s*\\d\\+\\.\\s\\+\\\|^\\s*[-*+]\\s\\+
+    " Perfekcyjne rozpoznawanie punktora listy
+    autocmd FileType markdown,text setlocal formatlistpat=^\s*\([0-9]\+\.\|[-*+]\)\s\+
+
+    " Brak wizualnych przesunięć w locie
+    autocmd FileType markdown,text setlocal breakindent
+    autocmd FileType markdown,text setlocal breakindentopt=shift:0
 augroup END
 
 " TEO Syntax / Kolorowanie (vnoremapy zachowane z oryginału)
