@@ -20,6 +20,11 @@
     df = diff                   # Podgląd niezatwierdzonych zmian
     dfs = diff --staged         # Podgląd zmian dodanych do indexu (stage)
 
+    ps = push origin HEAD              # Szybki push obecnej gałęzi
+    psu = push -u origin HEAD          # Pierwszy push nowej gałęzi
+    pf = push --force-with-lease       # Bezpieczny push po git commit --amend
+    pl = pull origin HEAD              # Pobranie zmian dla obecnej gałęzi
+
     # Logi i drzewo (wygląda świetnie w terminalu)
     lg = log --oneline --graph --decorate --all
     last = log -1 HEAD --stat   # Podgląd ostatniego commita ze statystykami zmian
