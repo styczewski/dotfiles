@@ -208,3 +208,18 @@ fgd() {
     vim "$file"
   fi
 }
+
+# Interaktywne połączenie SSH z wykorzystaniem fzf
+fssh() {
+  local host
+  # Wyciąga nazwy Hostów z pliku ~/.ssh/config oraz listy znanych hostów (~/.ssh/known_hosts)
+  host=$( (
+    [ -f ~/.ssh/config ] && awk '/^Host / {for (i=2; i<=NF; i++) if ($i !~ /*/) print $i}' ~/.ssh/config
+    # [ -f ~/.ssh/known_hosts ] && cut -d' ' -f1 ~/.ssh/known_hosts | cut -d',' -f1 | tr -d '[]'
+  ) | sort -u | grep -v '^$' | fzf --prompt="Wybież serwer SSH > " --query="$1")
+
+  if [ -n "$host" ]; then
+    echo "Łączenie z: $host..."
+    ssh "$host"
+  fi
+}
