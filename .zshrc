@@ -130,12 +130,14 @@ alias lst='eza --tree --icons'
 alias lst1='eza --tree --level=1 --icons'
 alias lst2='eza --tree --level=2 --icons'
 alias lst3='eza --tree --level=3 --icons'
-alias sshmikrus='ssh root@srv16.mikr.us -p 10454'
-alias mkdate="mkdir `date '+%Y-%m-%d'` && cd `date '+%Y-%m-%d'` "
-alias stoper="/home/pstyczewski/.local/bin/termdown"
-alias timer="/home/pstyczewski/.local/bin/termdown"
-alias zegar="/home/pstyczewski/.local/bin/termdown -z"
 alias g='git'
+
+source  /storage/dodatkowe-konfigi/aliasy-praca
+source  /storage/dodatkowe-konfigi/aliasy-dom
+
+cping() {
+    ping "$1" | while read dt; do echo "$(date '+%Y-%m-%d %H:%M:%S.%3N') $dt"; done
+}
 
 # Alias 'ff': Interaktywne otwarcie pliku w Vimie z podglądem
 alias fv='vim $(fzf --preview "if [ -d {} ]; then eza --tree --icons {}; else batcat --style=numbers --color=always {}; fi")'
@@ -209,17 +211,46 @@ fgd() {
   fi
 }
 
-# Interaktywne połączenie SSH z wykorzystaniem fzf
+cping() {
+    ping "$1" | while read dt; do echo "$(date '+%Y-%m-%d %H:%M:%S.%3N') $dt"; done
+}
+
+# Interaktywne połączenie SSH / SFTP z obsługą bloków Host z pliku /storage/ssh-info
 fssh() {
+  local info_file="/storage/dodatkowe-konfigi/ssh-info"
+  local mode="ssh"
+  local query_arg=""
+
+  if [ ! -f "$info_file" ]; then
+    echo "Błąd: Plik $info_file nie istnieje."
+    return 1
+  fi
+
+  if [[ "$1" == "-s" || "$1" == "--sftp" ]]; then
+    mode="sftp"
+    shift
+  fi
+  query_arg="$1"
+
   local host
-  # Wyciąga nazwy Hostów z pliku ~/.ssh/config oraz listy znanych hostów (~/.ssh/known_hosts)
-  host=$( (
-    [ -f ~/.ssh/config ] && awk '/^Host / {for (i=2; i<=NF; i++) if ($i !~ /*/) print $i}' ~/.ssh/config
-    # [ -f ~/.ssh/known_hosts ] && cut -d' ' -f1 ~/.ssh/known_hosts | cut -d',' -f1 | tr -d '[]'
-  ) | sort -u | grep -v '^$' | fzf --prompt="Wybież serwer SSH > " --query="$1")
+  host=$(awk '/^[Hh]ost[[:space:]]+/ {for (i=2; i<=NF; i++) if ($i !~ /*/) print $i}' "$info_file" | sort -u | \
+    fzf --prompt="Wybrany serwer ($mode) > " \
+        --query="$query_arg" \
+        --preview="awk -v h='{}' '
+          \$1 ~ /^[Hh]ost$/ && \$2 == h { flag=1; print \$0; next }
+          \$1 ~ /^[Hh]ost$/ { flag=0 }
+          flag { print \$0 }
+        ' \"$info_file\"" \
+        --preview-window=right:50%:wrap)
 
   if [ -n "$host" ]; then
-    echo "Łączenie z: $host..."
-    ssh "$host"
+    echo "Nawiązywanie połączenia $mode -> $host..."
+    if [[ "$mode" == "sftp" ]]; then
+      sftp -F "$info_file" "$host"
+    else
+      ssh -F "$info_file" "$host"
+    fi
   fi
 }
+
+alias fsftp='fssh -s'
