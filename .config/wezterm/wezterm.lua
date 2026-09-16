@@ -1,107 +1,175 @@
 local wezterm = require 'wezterm'
 local config = wezterm.config_builder()
 
---------------------------------------------------------------------------------
--- 1. WYGLĄD I MOTYW (LOOK & FEEL)
---------------------------------------------------------------------------------
--- Wybierz schemat kolorów (np. Catppuccin Mocha, Tokyo Night, Gruvbox Dark)
-config.color_scheme = 'Catppuccin Mocha'
+-- Włączenie pełnego przetwarzania grafik oraz analizy protokołów
+config.enable_kitty_graphics = true
 
--- Czcionka (z automatycznym wsparciem dla ikon Nerdfonts)
-config.font = wezterm.font_with_fallback({
-  'JetBrains Mono',
-  'Fira Code',
-  'Noto Color Emoji',
-})
-config.font_size = 10.5
+-- -----------------------------------------------------------------------------
+-- 2. Wymiary okna i pasek kart na dole (jak w Tmuxie)
+-- -----------------------------------------------------------------------------
+config.initial_cols = 110
+config.initial_rows = 35
+config.enable_tab_bar = true
+config.use_fancy_tab_bar = true
+config.tab_bar_at_bottom = false
 
--- Okno i ramki
-config.window_background_opacity = 0.95
-config.enable_scroll_bar = false
-config.window_decorations = "RESIZE" -- Brak zbędnych belkowych nagłówków systemowych
-config.window_padding = {
-  left = 8,
-  right = 8,
-  top = 8,
-  bottom = 8,
-}
-
---------------------------------------------------------------------------------
--- 2. PASEK KART I STATUSU (TAB BAR & STATUS - STYL TMUX)
---------------------------------------------------------------------------------
-config.use_fancy_tab_bar = false
-config.tab_bar_at_bottom = true -- Pasek kart na dole, tak jak domyślnie w tmux
-config.hide_tab_bar_if_only_one_tab = false
-
--- Formatowanie etykiety karty (np. "1: bash")
+-- Indeksowanie kart od 1 zamiast od 0
 wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
-  local title = tab.active_pane.title
   local index = tab.tab_index + 1
-  if tab.is_active then
-    return {
-      { Background = { Color = '#89b4fa' } },
-      { Foreground = { Color = '#1e1e2e' } },
-      { Text = string.format(' %d: %s ', index, title) },
-    }
+  local title = tab.active_pane.title
+  if tab.tab_title and #tab.tab_title > 0 then
+    title = tab.tab_title
   end
   return {
-    { Background = { Color = '#313244' } },
-    { Foreground = { Color = '#cdd6f4' } },
-    { Text = string.format(' %d: %s ', index, title) },
+    { Text = ' ' .. index .. ': ' .. title .. ' ' },
   }
 end)
 
--- Prawy pasek statusu (Data, czas, nazwa hosta/sesji)
-wezterm.on('update-right-status', function(window, pane)
-  local date = wezterm.strftime('%Y-%m-%d %H:%M')
-  local hostname = wezterm.hostname()
-  window:set_right_status(wezterm.format({
-    { Foreground = { Color = '#89b4fa' } },
-    { Text = ' ' .. hostname .. ' ' },
-    { Foreground = { Color = '#6c7086' } },
-    { Text = '|' },
-    { Foreground = { Color = '#a6e3a1' } },
-    { Text = ' ' .. date .. ' ' },
-  }))
-end)
+-- -----------------------------------------------------------------------------
+-- 3. Wygląd okna, marginesy i przezroczystość
+-- -----------------------------------------------------------------------------
+config.window_decorations = "RESIZE"
+config.window_padding = {
+  left = '0pt',
+  right = '0pt',
+  top = '0pt',
+  bottom = '0pt',
+}
+config.window_background_opacity = 0.9
 
---------------------------------------------------------------------------------
--- 3. SKRÓTY KLAWISZOWE (PREFIX: `)
---------------------------------------------------------------------------------
--- Główny klawisz prefiksu: ` (backtick / grawis)
-config.leader = { key = '`', mods = 'NONE', timeout_milliseconds = 1000 }
+-- -----------------------------------------------------------------------------
+-- 4. Paleta kolorów (Coolnight + Własny kolor aktywnej karty)
+-- -----------------------------------------------------------------------------
+config.colors = {
+	foreground = "#CBE0F0",
+	background = "#011423",
+	cursor_bg = "#47FF9C",
+	cursor_border = "#47FF9C",
+	cursor_fg = "#011423",
+	selection_bg = "#033259",
+	selection_fg = "#CBE0F0",
+	ansi = { "#214969", "#E52E2E", "#44FFB1", "#FFE073", "#0FC5ED", "#a277ff", "#24EAF7", "#24EAF7" },
+	brights = { "#214969", "#E52E2E", "#44FFB1", "#FFE073", "#A277FF", "#a277ff", "#24EAF7", "#24EAF7" },
+
+  -- Konfiguracja kolorów paska kart:
+  tab_bar = {
+    -- Tło całego paska (tam gdzie nie ma kart)
+    background = '#010f1a',
+
+    -- Aktywna karta
+    active_tab = {
+      bg_color = '#1e2030', -- Twój wybrany kolor
+      fg_color = '#47FF9C', -- Kolor tekstu (seledynowy pasujący do kursora)
+      intensity = 'Bold',
+    },
+
+    -- Nieaktywne karty
+    inactive_tab = {
+      bg_color = '#011423',
+      fg_color = '#6272a4',
+    },
+
+    -- Nieaktywne karty po najechaniu myszką
+    inactive_tab_hover = {
+      bg_color = '#033259',
+      fg_color = '#CBE0F0',
+    },
+
+    -- Przycisk nowej karty (+)
+    new_tab = {
+      bg_color = '#011423',
+      fg_color = '#6272a4',
+    },
+    new_tab_hover = {
+      bg_color = '#033259',
+      fg_color = '#47FF9C',
+    },
+  },
+}
+
+-- -----------------------------------------------------------------------------
+-- 5. Typografia domyślna
+-- -----------------------------------------------------------------------------
+config.font = wezterm.font_with_fallback({
+  'Ubuntu Mono',
+  'Liberation Mono',
+  'Consolas',
+})
+config.font_size = 10.0
+config.line_height = 1.2
+
+-- -----------------------------------------------------------------------------
+-- 6. Kursor i zachowanie
+-- -----------------------------------------------------------------------------
+config.default_cursor_style = 'SteadyBlock'
+config.animation_fps = 1
+config.cursor_blink_rate = 0
+
+-- -----------------------------------------------------------------------------
+-- 7. KLAWISZ LEADER (Backtick / Tylda `)
+-- -----------------------------------------------------------------------------
+config.leader = { key = '`', timeout_milliseconds = 1000 }
 
 config.keys = {
-  -- Wpisanie fizycznego znaku ` po dwukrotnym szybkimi naciśnięciu (``)
-  { key = '`', mods = 'LEADER', action = wezterm.action.SendKey { key = '`' } },
+  -- Dwukrotne naciśnięcie ` wysyła fizyczny znak `
+  {
+    key = '`',
+    mods = 'LEADER',
+    action = wezterm.action.SendKey { key = '`' },
+  },
 
-  -- Podział okna (Splits)
-  { key = '|', mods = 'LEADER|SHIFT', action = wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' } },
-  { key = '-', mods = 'LEADER',       action = wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' } },
+  -- --- ZMIANA NAZWY KARTY ( Leader + , ) ---
+  {
+    key = ',',
+    mods = 'LEADER',
+    action = wezterm.action.PromptInputLine {
+      description = 'Podaj nowa nazwe karty:',
+      action = wezterm.action_callback(function(window, pane, line)
+        if line then
+          window:active_tab():set_title(line)
+        end
+      end),
+    },
+  },
 
-  -- Nawigacja między panelami w stylu Vima (` + h/j/k/l)
-  { key = 'h', mods = 'LEADER', action = wezterm.action.ActivatePaneDirection 'Left' },
-  { key = 'j', mods = 'LEADER', action = wezterm.action.ActivatePaneDirection 'Down' },
-  { key = 'k', mods = 'LEADER', action = wezterm.action.ActivatePaneDirection 'Up' },
-  { key = 'l', mods = 'LEADER', action = wezterm.action.ActivatePaneDirection 'Right' },
+  -- --- PRZESUWANIE KART / STRON ( Leader + [ oraz Leader + ] ) ---
+  { key = '[', mods = 'LEADER', action = wezterm.action.MoveTabRelative(-1) },
+  { key = ']', mods = 'LEADER', action = wezterm.action.MoveTabRelative(1) },
+  -- Działające również bezpośrednio z Alt (gdybyś wolał bez Leadera)
+  { key = '[', mods = 'ALT', action = wezterm.action.MoveTabRelative(-1) },
+  { key = ']', mods = 'ALT', action = wezterm.action.MoveTabRelative(1) },
 
-  -- Zmiana rozmiaru paneli (` + Strzałki)
-  { key = 'LeftArrow',  mods = 'LEADER', action = wezterm.action.AdjustPaneSize { 'Left', 5 } },
-  { key = 'RightArrow', mods = 'LEADER', action = wezterm.action.AdjustPaneSize { 'Right', 5 } },
-  { key = 'UpArrow',    mods = 'LEADER', action = wezterm.action.AdjustPaneSize { 'Up', 5 } },
-  { key = 'DownArrow',  mods = 'LEADER', action = wezterm.action.AdjustPaneSize { 'Down', 5 } },
+  -- --- PODZIAŁ PANELI ( Leader + i / o ) ---
+  { key = 'i', mods = 'LEADER', action = wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' }, },
+  { key = 'o', mods = 'LEADER', action = wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' }, },
 
-  -- Powiększenie aktywnego panelu (` + z)
-  { key = 'z', mods = 'LEADER', action = wezterm.action.TogglePaneZoomState },
+  -- --- NAWIGACJA PO PANELACH ( Leader + h / j / k / l ) ---
+  { key = 'h', mods = 'ALT', action = wezterm.action.ActivatePaneDirection 'Left' },
+  { key = 'j', mods = 'ALT', action = wezterm.action.ActivatePaneDirection 'Down' },
+  { key = 'k', mods = 'ALT', action = wezterm.action.ActivatePaneDirection 'Up' },
+  { key = 'l', mods = 'ALT', action = wezterm.action.ActivatePaneDirection 'Right' },
 
-  -- Zarządzanie kartami (` + c, n, p, x, &)
-  { key = 'c', mods = 'LEADER', action = wezterm.action.SpawnTab 'CurrentPaneDomain' },
-  { key = 'n', mods = 'LEADER', action = wezterm.action.ActivateTabRelative(1) },
-  { key = 'p', mods = 'LEADER', action = wezterm.action.ActivateTabRelative(-1) },
-  { key = '&', mods = 'LEADER|SHIFT', action = wezterm.action.CloseCurrentTab { confirm = true } },
+  -- --- ZAMYKANIE PANELU ( Leader + x ) ---
   { key = 'x', mods = 'LEADER', action = wezterm.action.CloseCurrentPane { confirm = true } },
 
-  -- Szybkie przełączanie kart po numerze (` + 1..9)
+  -- --- ZMIANA ROZMIARU PANELI ( Leader + Shift + H / J / K / L ) ---
+  { key = 'H', mods = 'ALT|SHIFT', action = wezterm.action.AdjustPaneSize { 'Left', 2 } },
+  { key = 'J', mods = 'ALT|SHIFT', action = wezterm.action.AdjustPaneSize { 'Down', 2 } },
+  { key = 'K', mods = 'ALT|SHIFT', action = wezterm.action.AdjustPaneSize { 'Up', 2 } },
+  { key = 'L', mods = 'ALT|SHIFT', action = wezterm.action.AdjustPaneSize { 'Right', 2 } },
+
+  -- --- ZARZĄDZANIE KARTAMI (TABS) ---
+  -- Leader + c -> Nowa karta
+  {
+    key = 'c',
+    mods = 'LEADER',
+    action = wezterm.action.SpawnCommandInNewTab { cwd = wezterm.home_dir },
+  },
+  -- Leader + n / Leader + p -> Następna / Poprzednia karta
+  { key = 'n', mods = 'LEADER', action = wezterm.action.ActivateTabRelative(1) },
+  { key = 'p', mods = 'LEADER', action = wezterm.action.ActivateTabRelative(-1) },
+
+  -- Leader + 1..9 -> Skok do karty 1..9
   { key = '1', mods = 'LEADER', action = wezterm.action.ActivateTab(0) },
   { key = '2', mods = 'LEADER', action = wezterm.action.ActivateTab(1) },
   { key = '3', mods = 'LEADER', action = wezterm.action.ActivateTab(2) },
@@ -112,14 +180,38 @@ config.keys = {
   { key = '8', mods = 'LEADER', action = wezterm.action.ActivateTab(7) },
   { key = '9', mods = 'LEADER', action = wezterm.action.ActivateTab(8) },
 
-  -- Tryb kopiowania / przewijania (` + [)
-  { key = '[', mods = 'LEADER', action = wezterm.action.ActivateCopyMode },
+  -- --- TRYB CZYTANIA (Alt + R) I PEŁNY EKRAN (Alt + Enter) ---
+  {
+    key = 'r',
+    mods = 'ALT',
+    action = wezterm.action_callback(function(window, pane)
+      local overrides = window:get_config_overrides() or {}
+      if not overrides.font then
+        overrides.font = wezterm.font_with_fallback({
+          'JetBrains Mono',
+		  'Courier Prime',
+          'Courier New',
+        })
+        overrides.font_size = 13.5
+        overrides.line_height = 1.1
+        overrides.cell_width = 0.8
+      else
+        overrides.font = nil
+        overrides.font_size = nil
+        overrides.line_height = nil
+        overrides.cell_width = nil
+      end
+      window:set_config_overrides(overrides)
+    end),
+  },
+  { key = 'Enter', mods = 'ALT', action = wezterm.action.ToggleFullScreen },
+
+  -- --j ZOOM TERMINALA (CTRL + / - / 0) ---
+  { key = '=', mods = 'CTRL', action = wezterm.action.IncreaseFontSize },
+  { key = '-', mods = 'CTRL', action = wezterm.action.DecreaseFontSize },
+  { key = '0', mods = 'CTRL', action = wezterm.action.ResetFontSize },
 }
 
---------------------------------------------------------------------------------
--- 4. OCHRONA PRZED PRZYPADKOWYM ZAMKNIĘCIEM I INNE
---------------------------------------------------------------------------------
-config.scrollback_lines = 10000
-config.check_for_updates = false
+config.audible_bell = "Disabled"
 
 return config
