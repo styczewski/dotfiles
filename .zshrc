@@ -132,8 +132,8 @@ alias lst2='eza --tree --level=2 --icons'
 alias lst3='eza --tree --level=3 --icons'
 alias g='git'
 
-source  /storage/dodatkowe-konfigi/aliasy-praca
-source  /storage/dodatkowe-konfigi/aliasy-dom
+source  /storage/pawelkonfig/aliasy/aliasy-praca
+source  /storage/pawelkonfig/aliasy/aliasy-dom
 
 cping() {
     ping "$1" | while read dt; do echo "$(date '+%Y-%m-%d %H:%M:%S.%3N') $dt"; done
@@ -217,7 +217,7 @@ cping() {
 
 # Interaktywne połączenie SSH / SFTP z obsługą bloków Host z pliku /storage/ssh-info
 fssh() {
-  local info_file="/storage/dodatkowe-konfigi/ssh-info"
+  local info_file="/storage/pawelkonfig/aliasy/ssh-info"
   local mode="ssh"
   local query_arg=""
 
@@ -254,3 +254,4 @@ fssh() {
 }
 
 alias fsftp='fssh -s'
+
