@@ -16,7 +16,7 @@
 
 [alias]
     # Podstawowe komendy
-    st = status -s              # Zwięzły status (zamiast długiego git status)
+    st = status -s -b           # Zwięzły status (zamiast długiego git status)
     co = checkout               # Przełączanie gałęzi / przywracanie plików
     cb = checkout -b            # Tworzenie nowej gałęzi i natychmiastowe przejście
     br = branch                 # Zarządzanie gałęziami
