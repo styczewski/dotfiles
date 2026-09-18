@@ -731,7 +731,7 @@ vmap F <Plug>(easymotion-bd-2f)
 
 " }}}
 
-:source /storage/doku/abbreviations.vim
-:source /storage/doku/abbreviations_osoby.vim
+:source /storage/pawelkonfig/vim/abbreviations.vim
+:source /storage/pawelkonfig/vim/abbreviations_osoby.vim
 
 " vim:foldmethod=marker:foldlevel=0
