@@ -8,7 +8,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="robbyrussell"
+ZSH_THEME="candy"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -122,6 +122,7 @@ fi
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias cfz='vim ~/.zshrc'
 alias rcfz='source ~/.zshrc'
+alias viml='vim -u ~/.vimrclite'
 alias ls='eza --group-directories-first --icons'
 alias lsa='eza -a --group-directories-first --icons'
 alias lls='eza -l --group-directories-first --icons'
