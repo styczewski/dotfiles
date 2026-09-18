@@ -87,7 +87,17 @@ fi
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git aliases alias-finder zsh-interactive-cd web-search)
+plugins=(
+  git 
+  aliases 
+  alias-finder 
+  zsh-interactive-cd 
+  web-search 
+  colored-man-pages 
+  command-not-found
+  zsh-syntax-highlighting
+  zsh-autosuggestions
+  )
 
 source $ZSH/oh-my-zsh.sh
 eval "$(zoxide init zsh)"
@@ -257,3 +267,9 @@ fssh() {
 
 alias fsftp='fssh -s'
 
+# export GOPATH="$HOME/go"
+# export PATH="$PATH:$GOPATH/bin"
+
+if [ -f "/storage/pawelkonfig/gemini.env" ]; then
+    source "/storage/pawelkonfig/gemini.env"
+fi
