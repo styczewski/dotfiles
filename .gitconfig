@@ -23,30 +23,3 @@
 [init]
 	defaultBranch = master
 
-[alias]
-    # Podstawowe komendy
-    st = status -s -b           # Zwięzły status (zamiast długiego git status)
-    co = checkout               # Przełączanie gałęzi / przywracanie plików
-    cb = checkout -b            # Tworzenie nowej gałęzi i natychmiastowe przejście
-    br = branch                 # Zarządzanie gałęziami
-    cm = commit -m              # Szybki commit z wiadomością
-    ca = commit --amend --no-edit # Dołączenie zmian do ostatniego commita bez zmiany wiadomości
-
-    # Zmiany i dodawanie
-    aa = add -A                 # Dodaj wszystkie zmiany
-    ap = add -p                 # Interaktywne dodawanie zmian (patch by patch)
-    df = diff                   # Podgląd niezatwierdzonych zmian
-    dfs = diff --staged         # Podgląd zmian dodanych do indexu (stage)
-
-    ps = push origin HEAD              # Szybki push obecnej gałęzi
-    psu = push -u origin HEAD          # Pierwszy push nowej gałęzi
-    pf = push --force-with-lease       # Bezpieczny push po git commit --amend
-    pl = pull origin HEAD              # Pobranie zmian dla obecnej gałęzi
-
-    # Logi i drzewo (wygląda świetnie w terminalu)
-    lg = log --oneline --graph --decorate --all
-    last = log -1 HEAD --stat   # Podgląd ostatniego commita ze statystykami zmian
-
-    # Bezpieczeństwo i czyszczenie
-    unstage = restore --staged  # Wycofanie pliku ze stage'a
-    undo = reset --soft HEAD~1  # Cofnięcie ostatniego commita (zmiany zostają w pliku)
