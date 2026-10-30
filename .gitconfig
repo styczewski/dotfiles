@@ -23,3 +23,12 @@
 [init]
 	defaultBranch = master
 
+[safe]
+	directory = /storage/doku
+
+[alias]
+	# Tworzy archiwum ZIP z aktualnego stanu (HEAD)
+	zip = "!f() { git archive --format=zip --output=\"${1:-archive}.zip\" HEAD; }; f"
+
+	# Tworzy skompresowane archiwum TAR.GZ z aktualnego stanu (HEAD)
+	tar = "!f() { git archive --format=tar.gz --output=\"${1:-archive}.tar.gz\" HEAD; }; f"
