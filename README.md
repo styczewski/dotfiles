@@ -5,6 +5,7 @@ Pliki te umieszczam na github dla własnego pożytku (kopia, dostęp z każdego 
 ## Ustawienia dla programów terminalowych
 Lubię terminal i programy w nim uruchamiane
 
+- Neovim (edytor tekstu, fork vim'a)
 - VIM  (edytor tekstu)
 - Ranger (manedżer plików)
 - Newsboat (czytnik kanałów RSS)
