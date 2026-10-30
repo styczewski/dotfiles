@@ -65,6 +65,16 @@ ZSH_THEME="candy"
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
+# Which plugins would you like to load?
+# Standard plugins can be found in $ZSH/plugins/
+# Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+plugins=(git aliases alias-finder zsh-interactive-cd web-search)
+
+source $ZSH/oh-my-zsh.sh
+eval "$(zoxide init zsh)"
+
 # --- Uniwersalne ładowanie fzf ---
 if fzf --zsh &>/dev/null; then
   # Dla fzf >= 0.48.0
@@ -82,28 +92,8 @@ elif [ -f ~/.fzf.zsh ]; then
   source ~/.fzf.zsh
 fi
 
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(
-  git 
-  aliases 
-  alias-finder 
-  zsh-interactive-cd 
-  web-search 
-  colored-man-pages 
-  command-not-found
-  zsh-syntax-highlighting
-  zsh-autosuggestions
-  )
-
-source $ZSH/oh-my-zsh.sh
-eval "$(zoxide init zsh)"
 
 # User configuration
-
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -266,10 +256,6 @@ fssh() {
 }
 
 alias fsftp='fssh -s'
+# Dźwięk 800Hz przez 300ms wywołany w PowerShell z poziomu WSL
+alias ding='powershell.exe -c "[console]::beep(800, 300)" 2>/dev/null'
 
-# export GOPATH="$HOME/go"
-# export PATH="$PATH:$GOPATH/bin"
-
-if [ -f "/storage/pawelkonfig/gemini.env" ]; then
-    source "/storage/pawelkonfig/gemini.env"
-fi
